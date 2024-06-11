@@ -1,0 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-slate-50;
+}
+.card {
+  @apply rounded shadow bg-white overflow-hidden flex flex-col gap-4 p-8;
+}
