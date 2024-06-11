@@ -1,3 +1,4 @@
+// main.tsx
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import React, { lazy, Suspense } from "react";
 import ReactDOM from "react-dom/client";
@@ -15,6 +16,13 @@ import Loader from "./Components/Loader.tsx";
 
 // Context Provider
 import ContextProvider from "./Context/GlobalContext.tsx";
+
+// Theme Provider
+import { ThemeProvider } from "@mui/material/styles";
+import theme from "./theme/theme.ts";
+
+// Layouts
+const Layout = lazy(() => import("./Pages/Layouts/Layout.tsx"));
 
 // Lazy loading for routes
 const Login = lazy(() => import("./Pages/Account/Login.tsx"));
@@ -44,7 +52,9 @@ const router = createBrowserRouter([
     element: (
       <PrivateRoute>
         <Suspense fallback={<Loader />}>
-          <h1>Hola Estas autenticado</h1>
+          <Layout>
+            <h1>Hola Estas autenticado</h1>
+          </Layout>
         </Suspense>
       </PrivateRoute>
     ),
@@ -55,7 +65,9 @@ const router = createBrowserRouter([
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <ContextProvider>
-      <RouterProvider router={router}></RouterProvider>
+      <ThemeProvider theme={theme}>
+        <RouterProvider router={router}></RouterProvider>
+      </ThemeProvider>
     </ContextProvider>
   </React.StrictMode>
 );

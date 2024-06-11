@@ -11,6 +11,7 @@ import React, {
 interface ContextType {
   jwt: string | null;
   setJwt: (jwt: string | null, expiresIn?: number) => void;
+  logout: () => void;
 }
 
 export const Context = createContext<ContextType | undefined>(undefined);
@@ -59,8 +60,17 @@ const ContextProvider: React.FC<ContextProviderProps> = ({ children }) => {
     }
   }, []);
 
+  const logout = () => {
+    sessionStorage.removeItem("jwt");
+    sessionStorage.removeItem("jwt_expiration");
+    setJwtState(null);
+    window.location.reload(); // Recargar la página
+  };
+
   return (
-    <Context.Provider value={{ jwt, setJwt }}>{children}</Context.Provider>
+    <Context.Provider value={{ jwt, setJwt, logout }}>
+      {children}
+    </Context.Provider>
   );
 };
 
