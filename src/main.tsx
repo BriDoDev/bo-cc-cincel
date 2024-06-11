@@ -11,11 +11,16 @@ import "@fontsource/roboto/500.css";
 import "@fontsource/roboto/700.css";
 
 // Loader
-import Loader from "./Components/Loader/Loader.tsx";
+import Loader from "./Components/Loader.tsx";
+
+// Context Provider
+import ContextProvider from "./Context/GlobalContext.tsx";
 
 // Lazy loading for routes
 const Login = lazy(() => import("./Pages/Account/Login.tsx"));
 const ForgotPassword = lazy(() => import("./Pages/Account/ForgotPassword.tsx"));
+
+import PrivateRoute from "./Components/PrivateRoute.tsx";
 
 const router = createBrowserRouter([
   {
@@ -34,11 +39,24 @@ const router = createBrowserRouter([
       </Suspense>
     ),
   },
+  {
+    path: "/",
+    element: (
+      <PrivateRoute>
+        <Suspense fallback={<Loader />}>
+          <h1>Hola Estas autenticado</h1>
+        </Suspense>
+      </PrivateRoute>
+    ),
+  },
+  // Puedes agregar más rutas privadas aquí
 ]);
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <RouterProvider router={router}></RouterProvider>
+    <ContextProvider>
+      <RouterProvider router={router}></RouterProvider>
+    </ContextProvider>
   </React.StrictMode>
 );
 

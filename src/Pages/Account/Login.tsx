@@ -3,8 +3,13 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import { useEffect } from "react";
 import * as Yup from "yup";
 import Aos from "aos";
+import { useGlobalContext } from "../../Context/GlobalContext";
+import useScrollToTopNavigation from "../../hooks/useScrollToTopNavigation";
 
 const Login = () => {
+  const { setJwt } = useGlobalContext();
+  const navigateTo = useScrollToTopNavigation();
+
   // Inicializar AOS
   useEffect(() => {
     Aos.init({
@@ -36,8 +41,12 @@ const Login = () => {
         initialValues={{ email: "", password: "" }}
         validationSchema={validationSchema}
         onSubmit={(values) => {
+          const dummyJwt: string =
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE1MTYyNDI2MjJ9.dummySignatureForTesting";
+          const expiresIn: number = 3600; // Token expiration time in seconds (1 hour)
+          setJwt(dummyJwt, expiresIn); // Guardar el JWT en el contexto
           console.log(values);
-          // Lógica de validación de usuario
+          navigateTo("/");
         }}
       >
         {({ errors, touched }) => (
