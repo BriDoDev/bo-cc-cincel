@@ -30,7 +30,7 @@ const Login = () => {
     <div
       data-aos="fade-up"
       data-aos-delay="00"
-      className="w-screen h-screen flex justify-center items-center"
+      className="w-screen h-screen flex justify-center items-center p-4"
     >
       <Formik
         initialValues={{ email: "", password: "" }}
