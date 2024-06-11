@@ -2,12 +2,12 @@ import { TextField, Button, Typography, Link } from "@mui/material";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import { useEffect } from "react";
 import * as Yup from "yup";
-import AOS from "aos";
+import Aos from "aos";
 
 const Login = () => {
   // Inicializar AOS
   useEffect(() => {
-    AOS.init({
+    Aos.init({
       duration: 1000, // Duración de la animación en milisegundos
       once: true, // Si se establece en true, la animación solo se ejecuta una vez
     });
