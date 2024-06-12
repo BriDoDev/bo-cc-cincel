@@ -95,7 +95,7 @@ const Login = () => {
               </Link>
             </div>
             <div
-              className="w-full mt-8"
+              className="w-full mt-6"
               data-aos="fade-up"
               data-aos-delay="200"
             >

@@ -66,7 +66,7 @@ const ForgotPassword = () => {
               helperText={<ErrorMessage name="email" />}
             />
             <div
-              className="w-full flex flex-wrap md:flex-nowrap xl:flex-nowrap gap-4 mt-8"
+              className="w-full flex flex-wrap-reverse md:flex-nowrap xl:flex-nowrap gap-4 mt-6"
               data-aos="fade-up"
               data-aos-delay="200"
             >
