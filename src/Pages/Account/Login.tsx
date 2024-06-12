@@ -1,24 +1,34 @@
-import { TextField, Button, Typography, Link } from "@mui/material";
+import {
+  TextField,
+  Button,
+  Link,
+  Box,
+  InputAdornment,
+  IconButton,
+} from "@mui/material";
 import { Formik, Form, Field, ErrorMessage } from "formik";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import * as Yup from "yup";
 import Aos from "aos";
 import { useGlobalContext } from "../../Context/GlobalContext";
 import useScrollToTopNavigation from "../../hooks/useScrollToTopNavigation";
+import Logo from "../../../public/img/logo-cincel.svg";
+import { Email, Visibility, VisibilityOff } from "@mui/icons-material";
 
 const Login = () => {
   const { setJwt } = useGlobalContext();
   const navigateTo = useScrollToTopNavigation();
+  const [showPassword, setShowPassword] = useState(false);
 
-  // Inicializar AOS
+  const handleClickShowPassword = () => setShowPassword((show) => !show);
+
   useEffect(() => {
     Aos.init({
-      duration: 1000, // Duración de la animación en milisegundos
-      once: true, // Si se establece en true, la animación solo se ejecuta una vez
+      duration: 1000,
+      once: true,
     });
   }, []);
 
-  // Esquema de validación con Yup
   const validationSchema = Yup.object({
     email: Yup.string()
       .email("Ingresa un correo electrónico válido")
@@ -44,7 +54,7 @@ const Login = () => {
           const dummyJwt: string =
             "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE1MTYyNDI2MjJ9.dummySignatureForTesting";
           const expiresIn: number = 3600; // Token expiration time in seconds (1 hour)
-          setJwt(dummyJwt, expiresIn); // Guardar el JWT en el contexto
+          setJwt(dummyJwt, expiresIn);
           console.log(values);
           navigateTo("/");
         }}
@@ -55,44 +65,68 @@ const Login = () => {
             noValidate
             autoComplete="off"
           >
-            <Typography
-              data-aos="fade-up"
-              data-aos-delay="00"
-              variant="h4"
-              gutterBottom
-              sx={{ mt: 2 }}
-            >
-              Iniciar sesión
-            </Typography>
-            <Field
-              data-aos="fade-up"
-              data-aos-delay="50"
-              as={TextField}
-              name="email"
-              type="email"
-              label="Correo electrónico"
-              fullWidth
-              required
-              autoFocus
-              error={touched.email && Boolean(errors.email)}
-              helperText={<ErrorMessage name="email" />}
+            <Box
+              component="img"
+              sx={{
+                height: 60,
+                display: { md: "flex" },
+                mr: 1,
+              }}
+              alt="Logo"
+              src={Logo}
             />
-            <Field
-              data-aos="fade-up"
-              data-aos-delay="100"
-              as={TextField}
-              name="password"
-              type="password"
-              label="Contraseña"
-              fullWidth
-              required
-              error={touched.password && Boolean(errors.password)}
-              helperText={<ErrorMessage name="password" />}
-            />
-            <div data-aos="fade-up" data-aos-delay="150">
-              <Link href="/forgot-password" variant="body2">
-                Olvide mi contraseña
-              </Link>
+            <div className="w-full flex flex-col gap-4">
+              <Field
+                data-aos="fade-up"
+                data-aos-delay="50"
+                as={TextField}
+                name="email"
+                type="email"
+                label="Correo electrónico"
+                fullWidth
+                required
+                autoFocus
+                error={touched.email && Boolean(errors.email)}
+                helperText={<ErrorMessage name="email" />}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <Email />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+
+              <Field
+                data-aos="fade-up"
+                data-aos-delay="100"
+                as={TextField}
+                name="password"
+                type={showPassword ? "text" : "password"}
+                label="Contraseña"
+                fullWidth
+                required
+                error={touched.password && Boolean(errors.password)}
+                helperText={<ErrorMessage name="password" />}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton onClick={handleClickShowPassword} edge="end">
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+              <div
+                data-aos="fade-up"
+                data-aos-delay="150"
+                className="w-full flex justify-center"
+              >
+                <Link href="/forgot-password" variant="body2">
+                  Olvide mi contraseña
+                </Link>
+              </div>
             </div>
             <div
               className="w-full mt-6"

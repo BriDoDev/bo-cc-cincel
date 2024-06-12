@@ -1,9 +1,11 @@
-import { TextField, Button, Typography } from "@mui/material";
+import { TextField, Button, Box, InputAdornment } from "@mui/material";
 import Aos from "aos";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import { useEffect } from "react";
 import * as Yup from "yup";
 import useScrollToTopNavigation from "../../hooks/useScrollToTopNavigation";
+import Logo from "../../../public/img/logo-cincel.svg";
+import { Email } from "@mui/icons-material";
 
 const ForgotPassword = () => {
   const navigateTo = useScrollToTopNavigation();
@@ -38,20 +40,29 @@ const ForgotPassword = () => {
       >
         {({ errors, touched }) => (
           <Form
-            className="card w-[600px] items-center mb-20"
+            className="card w-[600px] flex gap-8 items-center mb-20"
             noValidate
             autoComplete="off"
           >
-            <Typography
+            {/* <Typography
               data-aos="fade-up"
               data-aos-delay="00"
-              variant="h4"
+              variant="h6"
               gutterBottom
               sx={{ mt: 2 }}
             >
               Recupera tu contraseña
-            </Typography>
-            <div></div>
+            </Typography> */}
+            <Box
+              component="img"
+              sx={{
+                height: 60,
+                display: { md: "flex" },
+                mr: 1,
+              }}
+              alt="Logo"
+              src={Logo}
+            />
             <Field
               data-aos="fade-up"
               data-aos-delay="50"
@@ -64,6 +75,13 @@ const ForgotPassword = () => {
               autoFocus
               error={touched.email && Boolean(errors.email)}
               helperText={<ErrorMessage name="email" />}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <Email />
+                  </InputAdornment>
+                ),
+              }}
             />
             <div
               className="w-full flex flex-wrap-reverse md:flex-nowrap xl:flex-nowrap gap-4 mt-6"
