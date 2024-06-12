@@ -14,7 +14,7 @@ import MenuItem from "@mui/material/MenuItem";
 import Logo from "../../public/img/logo-cincel.svg";
 import { useGlobalContext } from "../Context/GlobalContext";
 
-const pages = ["Inicio", "Aprovisionamiento"];
+const pages = ["Inicio"];
 const settings = ["Cerrar sesión"];
 
 function ResponsiveAppBar() {

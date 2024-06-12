@@ -500,7 +500,7 @@ const App: React.FC = () => {
             </DialogContent>
             <DialogActions>
               <Button onClick={handleCloseProvisionDialog}>Cancelar</Button>
-              <Button variant="contained" variant="contained" type="submit">
+              <Button variant="contained" type="submit">
                 Guardar
               </Button>
             </DialogActions>
