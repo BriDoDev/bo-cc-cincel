@@ -26,9 +26,10 @@ import {
   Search as SearchIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
-  Report as ReportIcon,
   Add as AddIcon,
 } from "@mui/icons-material";
+import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
+import DescriptionIcon from "@mui/icons-material/Description";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { useGlobalContext } from "../Context/GlobalContext";
@@ -188,6 +189,7 @@ const App: React.FC = () => {
   };
 
   const handlePageChange = (event: unknown, newPage: number) => {
+    console.log(event);
     setPage(newPage);
   };
 
@@ -342,25 +344,25 @@ const App: React.FC = () => {
                         <EditIcon />
                       </IconButton>
                     </Tooltip>
-                    <Tooltip title="Eliminar">
-                      <IconButton
-                        onClick={() => handleOpenDeleteDialog(client)}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </Tooltip>
                     <Tooltip title="Aprovisionar">
                       <IconButton
                         onClick={() => handleOpenProvisionDialog(client)}
                       >
-                        <ReportIcon />
+                        <AttachMoneyIcon />
                       </IconButton>
                     </Tooltip>
                     <Tooltip title="Reporte">
                       <IconButton
                         onClick={() => showSnackbar("Reporte de cliente")}
                       >
-                        <ReportIcon />
+                        <DescriptionIcon />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Eliminar">
+                      <IconButton
+                        onClick={() => handleOpenDeleteDialog(client)}
+                      >
+                        <DeleteIcon />
                       </IconButton>
                     </Tooltip>
                   </TableCell>
@@ -427,7 +429,9 @@ const App: React.FC = () => {
                 </DialogContent>
                 <DialogActions>
                   <Button onClick={handleCloseEditDialog}>Cancelar</Button>
-                  <Button type="submit">Aceptar</Button>
+                  <Button variant="contained" type="submit">
+                    Aceptar
+                  </Button>
                 </DialogActions>
               </Form>
             )}
@@ -448,7 +452,9 @@ const App: React.FC = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDeleteDialog}>Cancelar</Button>
-          <Button onClick={handleDeleteClient}>Eliminar</Button>
+          <Button variant="contained" onClick={handleDeleteClient}>
+            Eliminar
+          </Button>
         </DialogActions>
       </Dialog>
 
@@ -494,7 +500,9 @@ const App: React.FC = () => {
             </DialogContent>
             <DialogActions>
               <Button onClick={handleCloseProvisionDialog}>Cancelar</Button>
-              <Button type="submit">Guardar</Button>
+              <Button variant="contained" variant="contained" type="submit">
+                Guardar
+              </Button>
             </DialogActions>
           </Form>
         </Formik>
@@ -541,7 +549,9 @@ const App: React.FC = () => {
             </DialogContent>
             <DialogActions>
               <Button onClick={handleCloseAddDialog}>Cancelar</Button>
-              <Button type="submit">Aceptar</Button>
+              <Button variant="contained" type="submit">
+                Aceptar
+              </Button>
             </DialogActions>
           </Form>
         </Formik>
