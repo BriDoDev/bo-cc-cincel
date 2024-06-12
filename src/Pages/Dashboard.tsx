@@ -19,6 +19,8 @@ import {
   InputLabel,
   FormControl,
   TablePagination,
+  Fab,
+  useMediaQuery,
 } from "@mui/material";
 import {
   Search as SearchIcon,
@@ -51,6 +53,7 @@ const App: React.FC = () => {
   const [openProvisionDialog, setOpenProvisionDialog] = useState(false);
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  const isMdOrSm = useMediaQuery("(max-width:960px)");
 
   const initialClients: Client[] = [
     {
@@ -282,8 +285,9 @@ const App: React.FC = () => {
 
   return (
     <div className="card">
-      <div className="w-full flex justify-between">
+      <div className="w-full flex gap-96 justify-stretch">
         <TextField
+          fullWidth
           value={searchQuery}
           onChange={handleSearchChange}
           placeholder="Buscar"
@@ -291,13 +295,26 @@ const App: React.FC = () => {
             endAdornment: <SearchIcon />,
           }}
         />
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={handleOpenAddDialog}
-        >
-          Nuevo cliente
-        </Button>
+        {!isMdOrSm && (
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={handleOpenAddDialog}
+            sx={{ minWidth: "max-content" }}
+          >
+            Nuevo cliente
+          </Button>
+        )}
+        {isMdOrSm && (
+          <Fab
+            color="primary"
+            aria-label="add"
+            onClick={handleOpenAddDialog}
+            style={{ position: "fixed", bottom: 16, right: 16 }}
+          >
+            <AddIcon />
+          </Fab>
+        )}
       </div>
       <TableContainer>
         <Table>
@@ -362,51 +379,69 @@ const App: React.FC = () => {
       />
 
       {/* Edit Dialog */}
-      <Dialog open={openEditDialog} onClose={handleCloseEditDialog}>
+      <Dialog
+        open={openEditDialog}
+        onClose={handleCloseEditDialog}
+        fullWidth
+        maxWidth="sm"
+      >
         <DialogTitle>Editar Cliente</DialogTitle>
         {selectedClient && (
           <Formik
             initialValues={selectedClient}
             validationSchema={Yup.object({
-              name: Yup.string().required("Required"),
+              name: Yup.string().required(
+                "Es necesario ingresar un nombre para continuar"
+              ),
               email: Yup.string()
-                .email("Invalid email address")
-                .required("Required"),
+                .email("Ingresa un correo electrónico válido")
+                .required("Es necesario ingresar un correo para continuar"),
             })}
             onSubmit={(values) => {
               handleSaveEdit(values);
             }}
           >
-            <Form>
-              <DialogContent>
-                <Field
-                  as={TextField}
-                  name="name"
-                  label="Nombre cliente"
-                  fullWidth
-                  margin="dense"
-                />
-                <ErrorMessage name="name" component="div" />
-                <Field
-                  as={TextField}
-                  name="email"
-                  label="Correo"
-                  fullWidth
-                  margin="dense"
-                />
-                <ErrorMessage name="email" component="div" />
-              </DialogContent>
-              <DialogActions>
-                <Button onClick={handleCloseEditDialog}>Cancelar</Button>
-                <Button type="submit">Aceptar</Button>
-              </DialogActions>
-            </Form>
+            {({ errors, touched }) => (
+              <Form>
+                <DialogContent>
+                  <Field
+                    as={TextField}
+                    name="name"
+                    label="Nombre cliente"
+                    fullWidth
+                    required
+                    error={touched.name && Boolean(errors.name)}
+                    helperText={<ErrorMessage name="name" />}
+                    margin="dense"
+                  />
+                  <Field
+                    as={TextField}
+                    name="email"
+                    label="Correo"
+                    fullWidth
+                    required
+                    error={touched.email && Boolean(errors.email)}
+                    helperText={<ErrorMessage name="email" />}
+                    margin="dense"
+                  />
+                </DialogContent>
+                <DialogActions>
+                  <Button onClick={handleCloseEditDialog}>Cancelar</Button>
+                  <Button type="submit">Aceptar</Button>
+                </DialogActions>
+              </Form>
+            )}
           </Formik>
         )}
       </Dialog>
 
       {/* Delete Dialog */}
-      <Dialog open={openDeleteDialog} onClose={handleCloseDeleteDialog}>
+      <Dialog
+        open={openDeleteDialog}
+        onClose={handleCloseDeleteDialog}
+        fullWidth
+        maxWidth="sm"
+      >
         <DialogTitle>Eliminar Cliente</DialogTitle>
         <DialogContent>
           ¿Está seguro que desea eliminar el cliente {selectedClient?.name}?
@@ -418,7 +453,12 @@ const App: React.FC = () => {
       </Dialog>
 
       {/* Provision Dialog */}
-      <Dialog open={openProvisionDialog} onClose={handleCloseProvisionDialog}>
+      <Dialog
+        open={openProvisionDialog}
+        onClose={handleCloseProvisionDialog}
+        fullWidth
+        maxWidth="sm"
+      >
         <DialogTitle>Aprovisionar Cliente: {selectedClient?.name}</DialogTitle>
         <Formik
           initialValues={{ provisionType: "", provisionAmount: 0 }}
@@ -461,7 +501,12 @@ const App: React.FC = () => {
       </Dialog>
 
       {/* Add Dialog */}
-      <Dialog open={openAddDialog} onClose={handleCloseAddDialog}>
+      <Dialog
+        open={openAddDialog}
+        onClose={handleCloseAddDialog}
+        fullWidth
+        maxWidth="sm"
+      >
         <DialogTitle>Nuevo Cliente</DialogTitle>
         <Formik
           initialValues={{ name: "", email: "" }}
