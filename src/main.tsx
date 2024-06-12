@@ -27,6 +27,7 @@ const Layout = lazy(() => import("./Pages/Layouts/Layout.tsx"));
 // Lazy loading for routes
 const Login = lazy(() => import("./Pages/Account/Login.tsx"));
 const ForgotPassword = lazy(() => import("./Pages/Account/ForgotPassword.tsx"));
+const Dashboard = lazy(() => import("./Pages/Dashboard.tsx"));
 
 import PrivateRoute from "./Components/PrivateRoute.tsx";
 
@@ -53,7 +54,7 @@ const router = createBrowserRouter([
       <PrivateRoute>
         <Suspense fallback={<Loader />}>
           <Layout>
-            <h1>Hola Estas autenticado</h1>
+            <Dashboard />
           </Layout>
         </Suspense>
       </PrivateRoute>
