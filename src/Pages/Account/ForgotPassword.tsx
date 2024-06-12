@@ -36,7 +36,7 @@ const ForgotPassword = () => {
       >
         {({ errors, touched }) => (
           <Form
-            className="card w-[500px] items-center"
+            className="card w-[500px] items-center mb-20"
             noValidate
             autoComplete="off"
           >
