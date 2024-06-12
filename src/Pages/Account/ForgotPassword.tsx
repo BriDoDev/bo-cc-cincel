@@ -6,8 +6,11 @@ import * as Yup from "yup";
 import useScrollToTopNavigation from "../../hooks/useScrollToTopNavigation";
 import Logo from "../../../public/img/logo-cincel.svg";
 import { Email } from "@mui/icons-material";
+import { useGlobalContext } from "../../Context/GlobalContext";
 
 const ForgotPassword = () => {
+  const { showSnackbar } = useGlobalContext();
+
   const navigateTo = useScrollToTopNavigation();
   // Inicializar AOS
   useEffect(() => {
@@ -35,6 +38,7 @@ const ForgotPassword = () => {
         validationSchema={validationSchema}
         onSubmit={(values) => {
           console.log(values);
+          showSnackbar("Se envió un correo de recuperación de contraseña");
           // Lógica de cambio de contraseña
         }}
       >
@@ -44,15 +48,6 @@ const ForgotPassword = () => {
             noValidate
             autoComplete="off"
           >
-            {/* <Typography
-              data-aos="fade-up"
-              data-aos-delay="00"
-              variant="h6"
-              gutterBottom
-              sx={{ mt: 2 }}
-            >
-              Recupera tu contraseña
-            </Typography> */}
             <Box
               component="img"
               sx={{

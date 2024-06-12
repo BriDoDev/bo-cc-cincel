@@ -1,4 +1,5 @@
 // src/context/GlobalContext.tsx
+import { Snackbar, SnackbarProps } from "@mui/material";
 import React, {
   createContext,
   useState,
@@ -12,6 +13,7 @@ interface ContextType {
   jwt: string | null;
   setJwt: (jwt: string | null, expiresIn?: number) => void;
   logout: () => void;
+  showSnackbar: (message: string) => void;
 }
 
 export const Context = createContext<ContextType | undefined>(undefined);
@@ -24,12 +26,33 @@ export const useGlobalContext = () => {
   return context;
 };
 
+//#region Interfaces
 interface ContextProviderProps {
   children: ReactNode;
 }
+interface SnackbarState extends SnackbarProps {
+  message: string;
+  open: boolean;
+}
+//#endregion
 
 const ContextProvider: React.FC<ContextProviderProps> = ({ children }) => {
   const [jwt, setJwtState] = useState<string | null>(null);
+  const [snackbarState, setSnackbarState] = useState<SnackbarState>({
+    message: "",
+    open: false,
+    autoHideDuration: 3000,
+    onClose: () => setSnackbarState((prev) => ({ ...prev, open: false })),
+  });
+
+  const showSnackbar = (message: string) => {
+    setSnackbarState({
+      message,
+      open: true,
+      autoHideDuration: 6000,
+      onClose: () => setSnackbarState((prev) => ({ ...prev, open: false })),
+    });
+  };
 
   const setJwt = (token: string | null, expiresIn?: number) => {
     if (token) {
@@ -68,8 +91,15 @@ const ContextProvider: React.FC<ContextProviderProps> = ({ children }) => {
   };
 
   return (
-    <Context.Provider value={{ jwt, setJwt, logout }}>
+    <Context.Provider value={{ jwt, setJwt, logout, showSnackbar }}>
       {children}
+      <Snackbar
+        {...snackbarState}
+        message={snackbarState.message}
+        open={snackbarState.open}
+        autoHideDuration={snackbarState.autoHideDuration}
+        onClose={snackbarState.onClose}
+      />
     </Context.Provider>
   );
 };
