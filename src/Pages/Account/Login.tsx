@@ -51,7 +51,7 @@ const Login = () => {
       >
         {({ errors, touched }) => (
           <Form
-            className="card w-[500px] items-center mb-20"
+            className="card w-[600px] items-center mb-20"
             noValidate
             autoComplete="off"
           >
@@ -89,25 +89,25 @@ const Login = () => {
               error={touched.password && Boolean(errors.password)}
               helperText={<ErrorMessage name="password" />}
             />
-            <Link
-              data-aos="fade-up"
-              data-aos-delay="150"
-              href="/forgot-password"
-              variant="body2"
-            >
-              Olvide mi contraseña
-            </Link>
-            <Button
+            <div data-aos="fade-up" data-aos-delay="150">
+              <Link href="/forgot-password" variant="body2">
+                Olvide mi contraseña
+              </Link>
+            </div>
+            <div
+              className="w-full mt-8"
               data-aos="fade-up"
               data-aos-delay="200"
-              type="submit"
-              fullWidth
-              variant="contained"
-              color="primary"
-              sx={{ mt: 3, mb: 2 }}
             >
-              Iniciar Sesión
-            </Button>
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                color="primary"
+              >
+                Iniciar Sesión
+              </Button>
+            </div>
           </Form>
         )}
       </Formik>

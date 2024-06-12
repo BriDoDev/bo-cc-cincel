@@ -3,8 +3,10 @@ import Aos from "aos";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import { useEffect } from "react";
 import * as Yup from "yup";
+import useScrollToTopNavigation from "../../hooks/useScrollToTopNavigation";
 
 const ForgotPassword = () => {
+  const navigateTo = useScrollToTopNavigation();
   // Inicializar AOS
   useEffect(() => {
     Aos.init({
@@ -36,7 +38,7 @@ const ForgotPassword = () => {
       >
         {({ errors, touched }) => (
           <Form
-            className="card w-[500px] items-center mb-20"
+            className="card w-[600px] items-center mb-20"
             noValidate
             autoComplete="off"
           >
@@ -49,6 +51,7 @@ const ForgotPassword = () => {
             >
               Recupera tu contraseña
             </Typography>
+            <div></div>
             <Field
               data-aos="fade-up"
               data-aos-delay="50"
@@ -62,17 +65,31 @@ const ForgotPassword = () => {
               error={touched.email && Boolean(errors.email)}
               helperText={<ErrorMessage name="email" />}
             />
-            <Button
+            <div
+              className="w-full flex flex-wrap md:flex-nowrap xl:flex-nowrap gap-4 mt-8"
               data-aos="fade-up"
-              data-aos-delay="100"
-              type="submit"
-              fullWidth
-              variant="contained"
-              color="primary"
-              sx={{ mt: 3, mb: 2 }}
+              data-aos-delay="200"
             >
-              Recuperar contraseña
-            </Button>
+              <Button
+                type="submit"
+                fullWidth
+                variant="outlined"
+                color="primary"
+                onClick={() => {
+                  navigateTo("/login");
+                }}
+              >
+                Regresar
+              </Button>
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                color="primary"
+              >
+                Recuperar contraseña
+              </Button>
+            </div>
           </Form>
         )}
       </Formik>
