@@ -6,7 +6,6 @@ interface ClientContextType {
   clients: Client[];
   setClients: React.Dispatch<React.SetStateAction<Client[]>>;
   showSnackbar: (message: string) => void;
-  isAuthenticated: boolean;
   isLoading: boolean;
   setIsLoading: (loading: boolean) => void;
 }
@@ -26,7 +25,7 @@ interface ClientProviderProps {
 }
 
 const ClientProvider: React.FC<ClientProviderProps> = ({ children }) => {
-  const { showSnackbar, isAuthenticated } = useAuthContext();
+  const { showSnackbar } = useAuthContext();
   const [clients, setClients] = useState<Client[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -38,7 +37,6 @@ const ClientProvider: React.FC<ClientProviderProps> = ({ children }) => {
         setClients,
         setIsLoading,
         showSnackbar,
-        isAuthenticated,
       }}
     >
       {children}

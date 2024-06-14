@@ -2,8 +2,8 @@ import React, {
   createContext,
   useState,
   useContext,
-  useEffect,
   ReactNode,
+  useEffect,
 } from "react";
 import { Snackbar } from "@mui/material";
 import { SnackbarState } from "../Types/Type";
@@ -13,8 +13,7 @@ interface AuthContextType {
   setJwt: (jwt: string | null, expiresIn?: number) => void;
   logout: () => void;
   showSnackbar: (message: string) => void;
-  isAuthenticated: boolean;
-  isLoading: boolean;
+  isAuthenticated: () => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -33,8 +32,6 @@ interface AuthProviderProps {
 
 const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [jwt, setJwtState] = useState<string | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(true); // Añadir estado de carga
   const [snackbarState, setSnackbarState] = useState<SnackbarState>({
     message: "",
     open: false,
@@ -43,19 +40,21 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setSnackbarState((prev: SnackbarState) => ({ ...prev, open: false })),
   });
 
-  useEffect(() => {
+  const isAuthenticated = () => {
     const token = sessionStorage.getItem("jwt");
     const expirationTime = sessionStorage.getItem("jwt_expiration");
-    const now = Math.floor(new Date().getTime() / 1000); // Convertir a segundos
+    const now = Math.floor(new Date().getTime() / 1000);
 
     if (token && expirationTime && now < parseInt(expirationTime)) {
-      setJwtState(token);
-      setIsAuthenticated(true);
+      return true;
     } else {
-      setJwtState(null);
-      setIsAuthenticated(false);
+      showSnackbar("Tu sesión ha caducado");
+      return false;
     }
-    setIsLoading(false);
+  };
+
+  useEffect(() => {
+    isAuthenticated();
   }, []);
 
   const showSnackbar = (message: string) => {
@@ -72,7 +71,6 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (token && expiresIn) {
       sessionStorage.setItem("jwt", token);
       sessionStorage.setItem("jwt_expiration", expiresIn.toString());
-      setIsAuthenticated(true);
       setJwtState(token);
 
       // Set a timeout to automatically logout when token expires
@@ -81,7 +79,6 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } else {
       sessionStorage.removeItem("jwt");
       sessionStorage.removeItem("jwt_expiration");
-      setIsAuthenticated(false);
       setJwtState(null);
     }
   };
@@ -90,7 +87,6 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     sessionStorage.removeItem("jwt");
     sessionStorage.removeItem("jwt_expiration");
     setJwtState(null);
-    setIsAuthenticated(false);
     window.location.reload();
   };
 
@@ -102,7 +98,6 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         logout,
         showSnackbar,
         isAuthenticated,
-        isLoading,
       }}
     >
       {children}

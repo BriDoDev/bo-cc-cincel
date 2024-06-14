@@ -1,14 +1,16 @@
 import axios from "axios";
 import { useClientContext } from "../Context/ClientContext";
 import { Client } from "../Types/Type";
+import { useAuthContext } from "../Context/AuthContext";
 
 const useClientApi = () => {
-  const { clients, setClients, showSnackbar, isAuthenticated, setIsLoading } =
+  const { clients, setClients, showSnackbar, setIsLoading } =
     useClientContext();
+  const { isAuthenticated } = useAuthContext();
 
   const fetchClients = async () => {
     try {
-      if (isAuthenticated) {
+      if (isAuthenticated()) {
         setIsLoading(true);
         const API_URL = import.meta.env.VITE_BACKENDURL + "/api/GetCredits";
         const response = await axios.get(API_URL, {
@@ -23,8 +25,6 @@ const useClientApi = () => {
         } else {
           throw new Error("Error al obtener clientes");
         }
-      } else {
-        showSnackbar("Tu sesión ha caducado");
       }
     } catch (error) {
       showSnackbar("Error al obtener clientes");
@@ -33,7 +33,7 @@ const useClientApi = () => {
 
   const addClient = async (client: Client) => {
     try {
-      if (isAuthenticated) {
+      if (isAuthenticated()) {
         const API_URL = import.meta.env.VITE_BACKENDURL + "/api/AddClient";
         await axios.post(API_URL, client, {
           headers: {
@@ -49,7 +49,7 @@ const useClientApi = () => {
 
   const updateClient = async (client: Client) => {
     try {
-      if (isAuthenticated) {
+      if (isAuthenticated()) {
         const API_URL = import.meta.env.VITE_BACKENDURL + "/api/UpdateClient";
         await axios.put(API_URL, client, {
           headers: {
@@ -65,7 +65,7 @@ const useClientApi = () => {
 
   const deleteClient = async (clientId: string) => {
     try {
-      if (isAuthenticated) {
+      if (isAuthenticated()) {
         const API_URL =
           import.meta.env.VITE_BACKENDURL + `/api/DeleteClient/${clientId}`;
         await axios.delete(API_URL, {
@@ -82,7 +82,7 @@ const useClientApi = () => {
 
   const provisionClient = async (clientId: string, provisionAmount: number) => {
     try {
-      if (isAuthenticated) {
+      if (isAuthenticated()) {
         const API_URL =
           import.meta.env.VITE_BACKENDURL + `/api/ProvisionClient/${clientId}`;
         await axios.post(
