@@ -53,9 +53,15 @@ const ContextProvider: React.FC<ContextProviderProps> = ({ children }) => {
 
   useEffect(() => {
     const token = sessionStorage.getItem("jwt");
+    console.log(token);
     const expirationTime = sessionStorage.getItem("jwt_expiration");
+    console.log(expirationTime);
     const now = Math.floor(new Date().getTime() / 1000); // Convertir a segundos
+    console.log(now);
 
+    console.log(
+      "if: " + token && expirationTime && now < parseInt(expirationTime)
+    );
     if (token && expirationTime && now < parseInt(expirationTime)) {
       setJwtState(token);
       setIsAuthenticated(true);
@@ -96,20 +102,22 @@ const ContextProvider: React.FC<ContextProviderProps> = ({ children }) => {
   };
 
   const fetchClients = async () => {
-    try {
-      const clientsData = await getClients();
-      setClients(clientsData);
-    } catch (error) {
-      showSnackbar("Error fetching clients");
-    }
+    getClients()
+      .then((clientsData: Client[]) => {
+        setClients(clientsData);
+      })
+      .catch((error) => {
+        showSnackbar(error.message);
+      });
   };
 
   const handleAddClient = async (client: Client) => {
     try {
       await addClient(client);
       fetchClients();
-    } catch (error) {
-      showSnackbar("Error adding client");
+    } catch (e) {
+      console.error(e);
+      showSnackbar("Error al agregar el cliente");
     }
   };
 
@@ -117,8 +125,9 @@ const ContextProvider: React.FC<ContextProviderProps> = ({ children }) => {
     try {
       await updateClient(client);
       fetchClients();
-    } catch (error) {
-      showSnackbar("Error updating client");
+    } catch (e) {
+      console.error(e);
+      showSnackbar("Error al actualizar cliente");
     }
   };
 
@@ -126,8 +135,9 @@ const ContextProvider: React.FC<ContextProviderProps> = ({ children }) => {
     try {
       await deleteClient(clientId);
       fetchClients();
-    } catch (error) {
-      showSnackbar("Error deleting client");
+    } catch (e) {
+      console.error(e);
+      showSnackbar("Error al eliminar cliente");
     }
   };
 
@@ -138,8 +148,9 @@ const ContextProvider: React.FC<ContextProviderProps> = ({ children }) => {
     try {
       await provisionClient(clientId, provisionAmount);
       fetchClients();
-    } catch (error) {
-      showSnackbar("Error provisioning client");
+    } catch (e) {
+      console.error(e);
+      showSnackbar("Error al aprovisionar cliente");
     }
   };
 

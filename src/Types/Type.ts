@@ -14,11 +14,13 @@ export interface ContextType {
   }
 
 export interface Client {
-    id: number;
+    id: string;
     name: string;
-    email: string;
+    assigned: number;
+    used: number;
     balance: number;
-    lastProvisioning: string;
+    email: string;
+    lastProvisioning: Date;
   }
   
   export interface SnackbarState {
