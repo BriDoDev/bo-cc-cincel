@@ -1,18 +1,21 @@
-import React, { useMemo } from "react";
+import React from "react";
 import { Navigate, useLocation } from "react-router-dom";
-import useAuth from "../hooks/useAuth";
+import { useAuthContext } from "../Context/AuthContext";
+import Loader from "./Loader";
 
 interface PrivateRouteProps {
   children: JSX.Element;
 }
 
 const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading } = useAuthContext();
   const location = useLocation();
 
-  const isAuth = useMemo(() => isAuthenticated, [isAuthenticated]);
+  if (isLoading) {
+    return <Loader />;
+  }
 
-  if (!isAuth) {
+  if (!isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 

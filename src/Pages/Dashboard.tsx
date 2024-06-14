@@ -35,17 +35,20 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { useAuthContext } from "../Context/AuthContext";
 import { Client } from "../Types/Type";
+import useClientApi from "../hooks/useClientApi";
+import { useClientContext } from "../Context/ClientContext";
 
 const Dashboard: React.FC = () => {
   const {
-    showSnackbar,
     clients,
     fetchClients,
     addClient,
     updateClient,
     deleteClient,
     provisionClient,
-  } = useAuthContext();
+  } = useClientApi();
+  const { isLoading } = useClientContext();
+  const { showSnackbar } = useAuthContext();
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -58,7 +61,7 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     fetchClients();
-  }, [fetchClients]);
+  }, []);
 
   const filteredClients = searchQuery
     ? clients.filter(
@@ -186,69 +189,92 @@ const Dashboard: React.FC = () => {
           </Fab>
         )}
       </div>
-      <TableContainer>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Cliente</TableCell>
-              <TableCell>Correo</TableCell>
-              <TableCell>Saldo disponible</TableCell>
-              <TableCell>Último aprovisionamiento</TableCell>
-              <TableCell>Acciones</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {filteredClients
-              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((client) => (
-                <TableRow key={client.id}>
-                  <TableCell>{client.nombre}</TableCell>
-                  <TableCell>{client.email}</TableCell>
-                  <TableCell>{client.saldo}</TableCell>
-                  <TableCell>{client.fecha}</TableCell>
-                  <TableCell>
-                    <Tooltip title="Editar">
-                      <IconButton onClick={() => handleOpenEditDialog(client)}>
-                        <EditIcon />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Aprovisionar">
-                      <IconButton
-                        onClick={() => handleOpenProvisionDialog(client)}
-                      >
-                        <AttachMoneyIcon />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Reporte">
-                      <IconButton
-                        onClick={() =>
-                          showSnackbar("Generación de reporte de cliente")
-                        }
-                      >
-                        <DescriptionIcon />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Eliminar">
-                      <IconButton
-                        onClick={() => handleOpenDeleteDialog(client)}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </Tooltip>
-                  </TableCell>
+      {isLoading ? (
+        <TableContainer className="border rounded-md shadow-md">
+          <Table>
+            <TableBody>
+              {Array.from({ length: 4 }).map((_, rowIndex) => (
+                <TableRow key={rowIndex}>
+                  {Array.from({ length: 1 }).map((_, colIndex) => (
+                    <TableCell key={colIndex} className="h-12">
+                      <div className="flex justify-center bg-slate-200 rounded items-center h-8 w-full animate-pulse"></div>
+                    </TableCell>
+                  ))}
                 </TableRow>
               ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      <TablePagination
-        component="div"
-        count={filteredClients.length}
-        page={page}
-        onPageChange={handlePageChange}
-        rowsPerPage={rowsPerPage}
-        onRowsPerPageChange={handleRowsPerPageChange}
-      />
+            </TableBody>
+          </Table>
+        </TableContainer>
+      ) : (
+        <>
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Cliente</TableCell>
+                  <TableCell>Correo</TableCell>
+                  <TableCell>Saldo disponible</TableCell>
+                  <TableCell>Último aprovisionamiento</TableCell>
+                  <TableCell>Acciones</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {filteredClients
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((client) => (
+                    <TableRow key={client.id}>
+                      <TableCell>{client.nombre}</TableCell>
+                      <TableCell>{client.email}</TableCell>
+                      <TableCell>{client.saldo}</TableCell>
+                      <TableCell>{client.fecha}</TableCell>
+                      <TableCell>
+                        <Tooltip title="Editar">
+                          <IconButton
+                            onClick={() => handleOpenEditDialog(client)}
+                          >
+                            <EditIcon />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Aprovisionar">
+                          <IconButton
+                            onClick={() => handleOpenProvisionDialog(client)}
+                          >
+                            <AttachMoneyIcon />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Reporte">
+                          <IconButton
+                            onClick={() =>
+                              showSnackbar("Generación de reporte de cliente")
+                            }
+                          >
+                            <DescriptionIcon />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Eliminar">
+                          <IconButton
+                            onClick={() => handleOpenDeleteDialog(client)}
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        </Tooltip>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          <TablePagination
+            component="div"
+            count={filteredClients.length}
+            page={page}
+            onPageChange={handlePageChange}
+            rowsPerPage={rowsPerPage}
+            onRowsPerPageChange={handleRowsPerPageChange}
+          />
+        </>
+      )}
+
       {/* Add Dialog */}
       <Dialog
         open={openAddDialog}

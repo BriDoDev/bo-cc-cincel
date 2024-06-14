@@ -13,10 +13,12 @@ import Aos from "aos";
 import Logo from "../../../public/img/logo-cincel.svg";
 import { Email, Visibility, VisibilityOff } from "@mui/icons-material";
 import useScrollToTopNavigation from "../../hooks/useScrollToTopNavigation";
+import useAuth from "../../hooks/useAuth";
 import { useAuthContext } from "../../Context/AuthContext";
 
 const Login = () => {
-  const { authenticate, showSnackbar } = useAuthContext();
+  const { authenticate } = useAuth();
+  const { showSnackbar } = useAuthContext();
   const navigateTo = useScrollToTopNavigation();
   const [showPassword, setShowPassword] = useState(false);
   const handleClickShowPassword = () => setShowPassword((show) => !show);

@@ -1,4 +1,3 @@
-// src/Context/AuthContext.tsx
 import React, {
   createContext,
   useState,
@@ -7,9 +6,7 @@ import React, {
   ReactNode,
 } from "react";
 import { Snackbar } from "@mui/material";
-import axios from "axios";
-import { DecodedToken, SnackbarState, userAuthenticate } from "../Types/Type";
-import { jwtDecode } from "jwt-decode";
+import { SnackbarState } from "../Types/Type";
 
 interface AuthContextType {
   jwt: string | null;
@@ -17,7 +14,7 @@ interface AuthContextType {
   logout: () => void;
   showSnackbar: (message: string) => void;
   isAuthenticated: boolean;
-  authenticate: (data: userAuthenticate) => Promise<string>;
+  isLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -37,11 +34,13 @@ interface AuthProviderProps {
 const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [jwt, setJwtState] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true); // Añadir estado de carga
   const [snackbarState, setSnackbarState] = useState<SnackbarState>({
     message: "",
     open: false,
     autoHideDuration: 3000,
-    onClose: () => setSnackbarState((prev) => ({ ...prev, open: false })),
+    onClose: () =>
+      setSnackbarState((prev: SnackbarState) => ({ ...prev, open: false })),
   });
 
   useEffect(() => {
@@ -56,6 +55,7 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setJwtState(null);
       setIsAuthenticated(false);
     }
+    setIsLoading(false);
   }, []);
 
   const showSnackbar = (message: string) => {
@@ -63,7 +63,8 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       message,
       open: true,
       autoHideDuration: 6000,
-      onClose: () => setSnackbarState((prev) => ({ ...prev, open: false })),
+      onClose: () =>
+        setSnackbarState((prev: SnackbarState) => ({ ...prev, open: false })),
     });
   };
 
@@ -93,21 +94,6 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     window.location.reload();
   };
 
-  const authenticate = async ({ email, password }: userAuthenticate) => {
-    try {
-      const API_URL = import.meta.env.VITE_BACKENDURL + "/Api/Login";
-      const response = await axios.post(API_URL, { email, password });
-      const jwt: string = response.data;
-      const decodedToken = jwtDecode<DecodedToken>(jwt);
-      const { exp } = decodedToken;
-      setJwt(jwt, exp);
-      return "Sesión iniciada con éxito";
-    } catch (e) {
-      console.error(e);
-      throw new Error("Error al iniciar sesión");
-    }
-  };
-
   return (
     <AuthContext.Provider
       value={{
@@ -116,7 +102,7 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         logout,
         showSnackbar,
         isAuthenticated,
-        authenticate,
+        isLoading,
       }}
     >
       {children}

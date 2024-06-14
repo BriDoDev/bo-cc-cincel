@@ -14,8 +14,9 @@ import "@fontsource/roboto/700.css";
 // Loader
 import Loader from "./Components/Loader.tsx";
 
-// Context Provider
-import ContextProvider from "./Context/AuthContext.tsx";
+// Context Providers
+import AuthProvider from "./Context/AuthContext.tsx";
+import ClientProvider from "./Context/ClientContext.tsx";
 
 // Theme Provider
 import { ThemeProvider } from "@mui/material/styles";
@@ -65,11 +66,13 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <ContextProvider>
-      <ThemeProvider theme={theme}>
-        <RouterProvider router={router} />
-      </ThemeProvider>
-    </ContextProvider>
+    <AuthProvider>
+      <ClientProvider>
+        <ThemeProvider theme={theme}>
+          <RouterProvider router={router} />
+        </ThemeProvider>
+      </ClientProvider>
+    </AuthProvider>
   </React.StrictMode>
 );
 
