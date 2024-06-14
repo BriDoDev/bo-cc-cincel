@@ -249,6 +249,56 @@ const Dashboard: React.FC = () => {
         rowsPerPage={rowsPerPage}
         onRowsPerPageChange={handleRowsPerPageChange}
       />
+      {/* Add Dialog */}
+      <Dialog
+        open={openAddDialog}
+        onClose={handleCloseAddDialog}
+        fullWidth
+        maxWidth="sm"
+      >
+        <DialogTitle>Nuevo Cliente</DialogTitle>
+        <Formik
+          initialValues={{ name: "", email: "" }}
+          validationSchema={Yup.object({
+            name: Yup.string().required("Requerido"),
+            email: Yup.string()
+              .email("Dirección de correo invalida")
+              .required("Requerido"),
+          })}
+          onSubmit={(values) => handleSaveAdd(values as Client)}
+        >
+          {({ errors, touched }) => (
+            <Form noValidate autoComplete="off">
+              <DialogContent>
+                <Field
+                  as={TextField}
+                  name="name"
+                  label="Nombre cliente"
+                  fullWidth
+                  required
+                  error={touched.name && Boolean(errors.name)}
+                  helperText={<ErrorMessage name="name" />}
+                  margin="dense"
+                />
+                <Field
+                  as={TextField}
+                  name="email"
+                  label="Correo"
+                  fullWidth
+                  required
+                  error={touched.email && Boolean(errors.email)}
+                  helperText={<ErrorMessage name="email" />}
+                  margin="dense"
+                />
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={handleCloseAddDialog}>Cancelar</Button>
+                <Button type="submit">Aceptar</Button>
+              </DialogActions>
+            </Form>
+          )}
+        </Formik>
+      </Dialog>
 
       {/* Edit Dialog */}
       <Dialog
@@ -333,83 +383,57 @@ const Dashboard: React.FC = () => {
         <Formik
           initialValues={{ provisionType: "", provisionAmount: 0 }}
           validationSchema={Yup.object({
-            provisionType: Yup.string().required("Required"),
+            provisionType: Yup.string().required("Requerido"),
             provisionAmount: Yup.number()
-              .required("Required")
-              .min(1, "Must be greater than 0"),
+              .min(1, "Debe ser mayor que 0")
+              .required("Requerido"),
           })}
           onSubmit={(values) => handleSaveProvision(values)}
         >
-          <Form noValidate autoComplete="off">
-            <DialogContent>
-              <FormControl fullWidth margin="dense">
-                <InputLabel>Tipo de aprovisionamiento</InputLabel>
-                <Field as={Select} name="provisionType">
-                  <MenuItem value="type1">Tipo 1</MenuItem>
-                  <MenuItem value="type2">Tipo 2</MenuItem>
-                </Field>
-                <ErrorMessage name="provisionType" component="div" />
-              </FormControl>
-              <Field
-                as={TextField}
-                name="provisionAmount"
-                label="Monto"
-                type="number"
-                fullWidth
-                margin="dense"
-              />
-              <ErrorMessage name="provisionAmount" component="div" />
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={handleCloseProvisionDialog}>Cancelar</Button>
-              <Button type="submit">Guardar</Button>
-            </DialogActions>
-          </Form>
-        </Formik>
-      </Dialog>
-
-      {/* Add Dialog */}
-      <Dialog
-        open={openAddDialog}
-        onClose={handleCloseAddDialog}
-        fullWidth
-        maxWidth="sm"
-      >
-        <DialogTitle>Nuevo Cliente</DialogTitle>
-        <Formik
-          initialValues={{ name: "", email: "" }}
-          validationSchema={Yup.object({
-            name: Yup.string().required("Required"),
-            email: Yup.string()
-              .email("Invalid email address")
-              .required("Required"),
-          })}
-          onSubmit={(values) => handleSaveAdd(values as Client)}
-        >
-          <Form noValidate autoComplete="off">
-            <DialogContent>
-              <Field
-                as={TextField}
-                name="name"
-                label="Nombre cliente"
-                fullWidth
-                margin="dense"
-              />
-              <ErrorMessage name="name" component="div" />
-              <Field
-                as={TextField}
-                name="email"
-                label="Correo"
-                fullWidth
-                margin="dense"
-              />
-              <ErrorMessage name="email" component="div" />
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={handleCloseAddDialog}>Cancelar</Button>
-              <Button type="submit">Aceptar</Button>
-            </DialogActions>
-          </Form>
+          {({ errors, touched }) => (
+            <Form noValidate autoComplete="off">
+              <DialogContent>
+                <FormControl
+                  fullWidth
+                  margin="dense"
+                  error={touched.provisionType && Boolean(errors.provisionType)}
+                >
+                  <InputLabel>Tipo de aprovisionamiento</InputLabel>
+                  <Field
+                    as={Select}
+                    name="provisionType"
+                    label="Tipo de aprovisionamiento"
+                    fullWidth
+                    required
+                    error={
+                      touched.provisionType && Boolean(errors.provisionType)
+                    }
+                    helperText={<ErrorMessage name="provisionType" />}
+                  >
+                    <MenuItem value="type1">Tipo 1</MenuItem>
+                    <MenuItem value="type2">Tipo 2</MenuItem>
+                  </Field>
+                </FormControl>
+                <Field
+                  as={TextField}
+                  name="provisionAmount"
+                  label="Monto"
+                  type="number"
+                  fullWidth
+                  required
+                  margin="dense"
+                  error={
+                    touched.provisionAmount && Boolean(errors.provisionAmount)
+                  }
+                  helperText={<ErrorMessage name="provisionAmount" />}
+                />
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={handleCloseProvisionDialog}>Cancelar</Button>
+                <Button type="submit">Guardar</Button>
+              </DialogActions>
+            </Form>
+          )}
         </Formik>
       </Dialog>
     </div>

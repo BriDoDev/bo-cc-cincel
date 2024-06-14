@@ -143,7 +143,7 @@ function ResponsiveAppBar() {
             <Tooltip title={EMAIL}>
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                 <Avatar
-                  alt={EMAIL.toUpperCase()}
+                  alt={EMAIL?.toUpperCase()}
                   src="/static/images/avatar/2.jpg"
                 />
               </IconButton>
