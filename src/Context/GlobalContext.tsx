@@ -19,8 +19,8 @@ interface ContextType {
   fetchClients: () => void;
   addClient: (client: Client) => Promise<void>;
   updateClient: (client: Client) => Promise<void>;
-  deleteClient: (clientId: number) => Promise<void>;
-  provisionClient: (clientId: number, provisionAmount: number) => Promise<void>;
+  deleteClient: (clientId: string) => Promise<void>;
+  provisionClient: (clientId: string, provisionAmount: number) => Promise<void>;
   isAuthenticated: boolean;
 }
 
@@ -102,19 +102,24 @@ const ContextProvider: React.FC<ContextProviderProps> = ({ children }) => {
   };
 
   const fetchClients = async () => {
-    getClients()
-      .then((clientsData: Client[]) => {
+    try {
+      if (isAuthenticated) {
+        const clientsData: Client[] = await getClients();
         setClients(clientsData);
-      })
-      .catch((error) => {
-        showSnackbar(error.message);
-      });
+      } else {
+        showSnackbar("Tu sesión ha caducado");
+      }
+    } catch (error) {
+      showSnackbar("Error al obtener clientes");
+    }
   };
 
   const handleAddClient = async (client: Client) => {
     try {
-      await addClient(client);
-      fetchClients();
+      if (isAuthenticated) {
+        await addClient(client);
+        fetchClients();
+      }
     } catch (e) {
       console.error(e);
       showSnackbar("Error al agregar el cliente");
@@ -123,18 +128,22 @@ const ContextProvider: React.FC<ContextProviderProps> = ({ children }) => {
 
   const handleUpdateClient = async (client: Client) => {
     try {
-      await updateClient(client);
-      fetchClients();
+      if (isAuthenticated) {
+        await updateClient(client);
+        fetchClients();
+      }
     } catch (e) {
       console.error(e);
       showSnackbar("Error al actualizar cliente");
     }
   };
 
-  const handleDeleteClient = async (clientId: number) => {
+  const handleDeleteClient = async (clientId: string) => {
     try {
-      await deleteClient(clientId);
-      fetchClients();
+      if (isAuthenticated) {
+        await deleteClient(clientId);
+        fetchClients();
+      }
     } catch (e) {
       console.error(e);
       showSnackbar("Error al eliminar cliente");
@@ -142,12 +151,14 @@ const ContextProvider: React.FC<ContextProviderProps> = ({ children }) => {
   };
 
   const handleProvisionClient = async (
-    clientId: number,
+    clientId: string,
     provisionAmount: number
   ) => {
     try {
-      await provisionClient(clientId, provisionAmount);
-      fetchClients();
+      if (isAuthenticated) {
+        await provisionClient(clientId, provisionAmount);
+        fetchClients();
+      }
     } catch (e) {
       console.error(e);
       showSnackbar("Error al aprovisionar cliente");

@@ -63,7 +63,7 @@ const Dashboard: React.FC = () => {
   const filteredClients = searchQuery
     ? clients.filter(
         (client) =>
-          client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          client.nombre.toLowerCase().includes(searchQuery.toLowerCase()) ||
           client.email.toLowerCase().includes(searchQuery.toLowerCase())
       )
     : clients;
@@ -202,10 +202,10 @@ const Dashboard: React.FC = () => {
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               .map((client) => (
                 <TableRow key={client.id}>
-                  <TableCell>{client.name}</TableCell>
+                  <TableCell>{client.nombre}</TableCell>
                   <TableCell>{client.email}</TableCell>
-                  <TableCell>{client.balance}</TableCell>
-                  <TableCell>{client.lastProvisioning}</TableCell>
+                  <TableCell>{client.saldo}</TableCell>
+                  <TableCell>{client.fecha}</TableCell>
                   <TableCell>
                     <Tooltip title="Editar">
                       <IconButton onClick={() => handleOpenEditDialog(client)}>
@@ -258,9 +258,9 @@ const Dashboard: React.FC = () => {
       >
         <DialogTitle>Nuevo Cliente</DialogTitle>
         <Formik
-          initialValues={{ name: "", email: "" }}
+          initialValues={{ nombre: "", email: "" }}
           validationSchema={Yup.object({
-            name: Yup.string().required("Requerido"),
+            nombre: Yup.string().required("Requerido"),
             email: Yup.string()
               .email("Dirección de correo invalida")
               .required("Requerido"),
@@ -272,17 +272,17 @@ const Dashboard: React.FC = () => {
               <DialogContent>
                 <Field
                   as={TextField}
-                  name="name"
+                  nombre="nombre"
                   label="Nombre cliente"
                   fullWidth
                   required
-                  error={touched.name && Boolean(errors.name)}
-                  helperText={<ErrorMessage name="name" />}
+                  error={touched.nombre && Boolean(errors.nombre)}
+                  helperText={<ErrorMessage name="nombre" />}
                   margin="dense"
                 />
                 <Field
                   as={TextField}
-                  name="email"
+                  nombre="email"
                   label="Correo"
                   fullWidth
                   required
@@ -312,7 +312,7 @@ const Dashboard: React.FC = () => {
           <Formik
             initialValues={selectedClient}
             validationSchema={Yup.object({
-              name: Yup.string().required(
+              nombre: Yup.string().required(
                 "Es necesario ingresar un nombre para continuar"
               ),
               email: Yup.string()
@@ -326,17 +326,17 @@ const Dashboard: React.FC = () => {
                 <DialogContent>
                   <Field
                     as={TextField}
-                    name="name"
+                    nombre="nombre"
                     label="Nombre cliente"
                     fullWidth
                     required
-                    error={touched.name && Boolean(errors.name)}
-                    helperText={<ErrorMessage name="name" />}
+                    error={touched.nombre && Boolean(errors.nombre)}
+                    helperText={<ErrorMessage name="nombre" />}
                     margin="dense"
                   />
                   <Field
                     as={TextField}
-                    name="email"
+                    nombre="email"
                     label="Correo"
                     fullWidth
                     required
@@ -364,7 +364,7 @@ const Dashboard: React.FC = () => {
       >
         <DialogTitle>Eliminar Cliente</DialogTitle>
         <DialogContent>
-          ¿Está seguro que desea eliminar el cliente {selectedClient?.name}?
+          ¿Está seguro que desea eliminar el cliente {selectedClient?.nombre}?
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDeleteDialog}>Cancelar</Button>
@@ -379,7 +379,9 @@ const Dashboard: React.FC = () => {
         fullWidth
         maxWidth="sm"
       >
-        <DialogTitle>Aprovisionar Cliente: {selectedClient?.name}</DialogTitle>
+        <DialogTitle>
+          Aprovisionar Cliente: {selectedClient?.nombre}
+        </DialogTitle>
         <Formik
           initialValues={{ provisionType: "", provisionAmount: 0 }}
           validationSchema={Yup.object({
@@ -401,7 +403,7 @@ const Dashboard: React.FC = () => {
                   <InputLabel>Tipo de aprovisionamiento</InputLabel>
                   <Field
                     as={Select}
-                    name="provisionType"
+                    nombre="provisionType"
                     label="Tipo de aprovisionamiento"
                     fullWidth
                     required
@@ -416,7 +418,7 @@ const Dashboard: React.FC = () => {
                 </FormControl>
                 <Field
                   as={TextField}
-                  name="provisionAmount"
+                  nombre="provisionAmount"
                   label="Monto"
                   type="number"
                   fullWidth

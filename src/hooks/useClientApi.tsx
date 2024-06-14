@@ -1,23 +1,14 @@
-// src/hooks/useClientApi
 import axios from "axios";
 import { Client } from "../Types/Type";
-import useAuth from "./useAuth";
 
 export const useClientApi = () => {
-  const { isAuthenticated } = useAuth();
-
   const getClients = async (): Promise<Client[]> => {
-    console.log(123);
-    if (!isAuthenticated()) {
-      throw new Error("Tu sesión ha caducado");
-    }
-
     try {
       const jwt = sessionStorage.getItem("jwt");
       const API_URL = import.meta.env.VITE_BACKENDURL + "/api/GetCredits";
       const response = await axios.get(API_URL, {
         headers: {
-          Authorization: jwt,
+          Authorization: `Bearer ${jwt}`,
         },
       });
 
@@ -27,7 +18,7 @@ export const useClientApi = () => {
         throw new Error(`Error al obtener clientes`);
       }
     } catch (e) {
-      throw new Error(`Error al obtener clientes`);
+      throw Error();
     }
   };
 
@@ -45,7 +36,7 @@ export const useClientApi = () => {
     return Promise.resolve();
   };
 
-  const deleteClient = async (clientId: number): Promise<void> => {
+  const deleteClient = async (clientId: string): Promise<void> => {
     if (clientId) {
       console.log("updateClient");
     }
@@ -53,7 +44,7 @@ export const useClientApi = () => {
   };
 
   const provisionClient = async (
-    clientId: number,
+    clientId: string,
     provisionAmount: number
   ): Promise<void> => {
     if (clientId && provisionAmount) {

@@ -15,12 +15,12 @@ export interface ContextType {
 
 export interface Client {
     id: string;
-    name: string;
-    assigned: number;
-    used: number;
-    balance: number;
+    nombre: string;
+    asignados: number;
+    usados: number;
+    saldo: number;
     email: string;
-    lastProvisioning: Date;
+    fecha: string;
   }
   
   export interface SnackbarState {
