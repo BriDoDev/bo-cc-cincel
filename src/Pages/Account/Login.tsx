@@ -2,7 +2,6 @@
 import {
   TextField,
   Button,
-  Link,
   Box,
   InputAdornment,
   IconButton,
@@ -13,16 +12,14 @@ import * as Yup from "yup";
 import Aos from "aos";
 import Logo from "../../../public/img/logo-cincel.svg";
 import { Email, Visibility, VisibilityOff } from "@mui/icons-material";
-import useAuth from "../../hooks/useAuth";
 import useScrollToTopNavigation from "../../hooks/useScrollToTopNavigation";
-import { useGlobalContext } from "../../Context/GlobalContext";
+import { useAuthContext } from "../../Context/AuthContext";
 
 const Login = () => {
-  const { showSnackbar } = useGlobalContext();
+  const { authenticate, showSnackbar } = useAuthContext();
   const navigateTo = useScrollToTopNavigation();
   const [showPassword, setShowPassword] = useState(false);
   const handleClickShowPassword = () => setShowPassword((show) => !show);
-  const { authenticate } = useAuth();
 
   useEffect(() => {
     Aos.init({
@@ -55,11 +52,11 @@ const Login = () => {
         onSubmit={(values) => {
           authenticate(values)
             .then((message) => {
-              navigateTo("/");
               showSnackbar(message);
+              navigateTo("/");
             })
-            .catch((error) => {
-              showSnackbar(error.message);
+            .catch((e) => {
+              showSnackbar(e.message);
             });
         }}
       >
@@ -127,9 +124,9 @@ const Login = () => {
                 data-aos-delay="150"
                 className="w-full flex justify-center"
               >
-                <Link href="/forgot-password" variant="body2">
+                {/* <Link href="/forgot-password" variant="body2">
                   Olvide mi contraseña
-                </Link>
+                </Link> */}
               </div>
             </div>
             <div

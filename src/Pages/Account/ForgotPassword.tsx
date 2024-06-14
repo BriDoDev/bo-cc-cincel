@@ -7,10 +7,10 @@ import * as Yup from "yup";
 import useScrollToTopNavigation from "../../hooks/useScrollToTopNavigation";
 import Logo from "../../../public/img/logo-cincel.svg";
 import { Email } from "@mui/icons-material";
-import { useGlobalContext } from "../../Context/GlobalContext";
+import { useAuthContext } from "../../Context/AuthContext";
 
 const ForgotPassword = () => {
-  const { showSnackbar } = useGlobalContext();
+  const { showSnackbar } = useAuthContext();
 
   const navigateTo = useScrollToTopNavigation();
   // Inicializar AOS

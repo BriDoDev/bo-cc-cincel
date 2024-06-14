@@ -15,7 +15,7 @@ import "@fontsource/roboto/700.css";
 import Loader from "./Components/Loader.tsx";
 
 // Context Provider
-import ContextProvider from "./Context/GlobalContext.tsx";
+import ContextProvider from "./Context/AuthContext.tsx";
 
 // Theme Provider
 import { ThemeProvider } from "@mui/material/styles";

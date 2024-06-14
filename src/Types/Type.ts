@@ -1,3 +1,4 @@
+// src/Types/Type.ts
 import { ReactNode } from "react";
 
 export interface ContextType {

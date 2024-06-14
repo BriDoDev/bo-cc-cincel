@@ -33,7 +33,7 @@ import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import DescriptionIcon from "@mui/icons-material/Description";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import { useGlobalContext } from "../Context/GlobalContext";
+import { useAuthContext } from "../Context/AuthContext";
 import { Client } from "../Types/Type";
 
 const Dashboard: React.FC = () => {
@@ -45,7 +45,7 @@ const Dashboard: React.FC = () => {
     updateClient,
     deleteClient,
     provisionClient,
-  } = useGlobalContext();
+  } = useAuthContext();
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);

@@ -12,7 +12,7 @@ import Button from "@mui/material/Button";
 import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
 import Logo from "../../public/img/logo-cincel.svg";
-import { useGlobalContext } from "../Context/GlobalContext";
+import { useAuthContext } from "../Context/AuthContext";
 import { jwtDecode } from "jwt-decode";
 import { DecodedToken } from "../Types/Type";
 
@@ -28,7 +28,7 @@ function ResponsiveAppBar() {
     EMAIL = decodedToken.Email;
   }
 
-  const { logout } = useGlobalContext();
+  const { logout } = useAuthContext();
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
     null
   );
