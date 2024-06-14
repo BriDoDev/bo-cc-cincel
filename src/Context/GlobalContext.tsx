@@ -1,3 +1,4 @@
+// src/Context/GlobalContext.tsx
 import React, {
   createContext,
   useState,
@@ -20,6 +21,7 @@ interface ContextType {
   updateClient: (client: Client) => Promise<void>;
   deleteClient: (clientId: number) => Promise<void>;
   provisionClient: (clientId: number, provisionAmount: number) => Promise<void>;
+  isAuthenticated: boolean;
 }
 
 export const Context = createContext<ContextType | undefined>(undefined);
@@ -38,6 +40,7 @@ interface ContextProviderProps {
 
 const ContextProvider: React.FC<ContextProviderProps> = ({ children }) => {
   const [jwt, setJwtState] = useState<string | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [snackbarState, setSnackbarState] = useState<SnackbarState>({
     message: "",
     open: false,
@@ -49,19 +52,18 @@ const ContextProvider: React.FC<ContextProviderProps> = ({ children }) => {
     useClientApi();
 
   useEffect(() => {
-    if (!jwt) return;
+    const token = sessionStorage.getItem("jwt");
+    const expirationTime = sessionStorage.getItem("jwt_expiration");
+    const now = Math.floor(new Date().getTime() / 1000); // Convertir a segundos
 
-    const initializeClients = async () => {
-      try {
-        const clientsData = await getClients();
-        setClients(clientsData);
-      } catch (error) {
-        showSnackbar("Error fetching clients");
-      }
-    };
-
-    initializeClients();
-  }, [jwt, getClients]);
+    if (token && expirationTime && now < parseInt(expirationTime)) {
+      setJwtState(token);
+      setIsAuthenticated(true);
+    } else {
+      setJwtState(null);
+      setIsAuthenticated(false);
+    }
+  }, []);
 
   const showSnackbar = (message: string) => {
     setSnackbarState({
@@ -73,38 +75,23 @@ const ContextProvider: React.FC<ContextProviderProps> = ({ children }) => {
   };
 
   const setJwt = (token: string | null, expiresIn?: number) => {
-    if (token) {
+    if (token && expiresIn) {
       sessionStorage.setItem("jwt", token);
-      if (expiresIn) {
-        const expirationTime = new Date().getTime() + expiresIn * 1000;
-        sessionStorage.setItem("jwt_expiration", expirationTime.toString());
-      } else {
-        sessionStorage.removeItem("jwt_expiration");
-      }
+      sessionStorage.setItem("jwt_expiration", expiresIn.toString());
+      setIsAuthenticated(true);
     } else {
       sessionStorage.removeItem("jwt");
       sessionStorage.removeItem("jwt_expiration");
+      setIsAuthenticated(false);
     }
     setJwtState(token);
   };
-
-  useEffect(() => {
-    const token = sessionStorage.getItem("jwt");
-    const expirationTime = sessionStorage.getItem("jwt_expiration");
-    if (token && expirationTime) {
-      const now = new Date().getTime();
-      if (now < parseInt(expirationTime)) {
-        setJwtState(token);
-      } else {
-        setJwt(null);
-      }
-    }
-  }, []);
 
   const logout = () => {
     sessionStorage.removeItem("jwt");
     sessionStorage.removeItem("jwt_expiration");
     setJwtState(null);
+    setIsAuthenticated(false);
     window.location.reload();
   };
 
@@ -167,6 +154,7 @@ const ContextProvider: React.FC<ContextProviderProps> = ({ children }) => {
     updateClient: handleUpdateClient,
     deleteClient: handleDeleteClient,
     provisionClient: handleProvisionClient,
+    isAuthenticated,
   };
 
   return (

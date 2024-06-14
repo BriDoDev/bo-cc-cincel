@@ -13,11 +13,21 @@ import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
 import Logo from "../../public/img/logo-cincel.svg";
 import { useGlobalContext } from "../Context/GlobalContext";
+import { jwtDecode } from "jwt-decode";
+import { DecodedToken } from "../Types/Type";
 
 const pages = ["Inicio"];
 const settings = ["Cerrar sesión"];
 
 function ResponsiveAppBar() {
+  const jwt = sessionStorage.getItem("jwt");
+  let EMAIL: string | undefined = undefined;
+
+  if (jwt) {
+    const decodedToken = jwtDecode<DecodedToken>(jwt);
+    EMAIL = decodedToken.Email;
+  }
+
   const { logout } = useGlobalContext();
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
     null
@@ -130,9 +140,12 @@ function ResponsiveAppBar() {
           </Box>
 
           <Box sx={{ flexGrow: 0 }}>
-            <Tooltip title="Open settings">
+            <Tooltip title={EMAIL}>
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
+                <Avatar
+                  alt={EMAIL.toUpperCase()}
+                  src="/static/images/avatar/2.jpg"
+                />
               </IconButton>
             </Tooltip>
             <Menu

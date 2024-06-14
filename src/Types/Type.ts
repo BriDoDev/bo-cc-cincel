@@ -30,3 +30,12 @@ export interface Client {
   export interface ContextProviderProps {
     children: ReactNode;
   }
+  
+  export interface userAuthenticate {
+    email: string,
+    password: string,
+  }
+  export interface DecodedToken {
+    exp: number;
+    Email: string;
+  }

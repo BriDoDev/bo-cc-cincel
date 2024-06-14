@@ -10,17 +10,18 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import { useEffect, useState } from "react";
 import * as Yup from "yup";
 import Aos from "aos";
-import { useGlobalContext } from "../../Context/GlobalContext";
-import useScrollToTopNavigation from "../../hooks/useScrollToTopNavigation";
 import Logo from "../../../public/img/logo-cincel.svg";
 import { Email, Visibility, VisibilityOff } from "@mui/icons-material";
+import useAuth from "../../hooks/useAuth";
+import useScrollToTopNavigation from "../../hooks/useScrollToTopNavigation";
+import { useGlobalContext } from "../../Context/GlobalContext";
 
 const Login = () => {
-  const { setJwt } = useGlobalContext();
+  const { showSnackbar } = useGlobalContext();
   const navigateTo = useScrollToTopNavigation();
   const [showPassword, setShowPassword] = useState(false);
-
   const handleClickShowPassword = () => setShowPassword((show) => !show);
+  const { authenticate } = useAuth();
 
   useEffect(() => {
     Aos.init({
@@ -51,12 +52,14 @@ const Login = () => {
         initialValues={{ email: "", password: "" }}
         validationSchema={validationSchema}
         onSubmit={(values) => {
-          const dummyJwt: string =
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE1MTYyNDI2MjJ9.dummySignatureForTesting";
-          const expiresIn: number = 3600; // Token expiration time in seconds (1 hour)
-          setJwt(dummyJwt, expiresIn);
-          console.log(values);
-          navigateTo("/");
+          authenticate(values)
+            .then((message) => {
+              navigateTo("/");
+              showSnackbar(message);
+            })
+            .catch((error) => {
+              showSnackbar(error.message);
+            });
         }}
       >
         {({ errors, touched }) => (
