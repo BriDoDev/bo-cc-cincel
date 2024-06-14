@@ -41,10 +41,15 @@ export const useClientApi = () => {
 
   const addClient = async (client: Client): Promise<void> => {
     return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        demoClients.push(client);
-        resolve();
-      }, 500);
+      const errorOccured = false; // Cambiar a `true` para simular un error
+      if (errorOccured) {
+        setTimeout(() => {
+          demoClients.push(client);
+          resolve();
+        }, 500);
+      } else {
+        reject(new Error("Error simulado"));
+      }
     });
   };
 
