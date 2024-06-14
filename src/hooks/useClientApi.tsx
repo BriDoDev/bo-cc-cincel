@@ -34,13 +34,14 @@ const useClientApi = () => {
   const addClient = async (client: Client) => {
     try {
       if (isAuthenticated()) {
-        const API_URL = import.meta.env.VITE_BACKENDURL + "/api/AddClient";
-        await axios.post(API_URL, client, {
-          headers: {
-            Authorization: `Bearer ${sessionStorage.getItem("jwt")}`,
-          },
-        });
-        fetchClients();
+        // const API_URL = import.meta.env.VITE_BACKENDURL + "/api/AddClient";
+        // await axios.post(API_URL, client, {
+        //   headers: {
+        //     Authorization: `Bearer ${sessionStorage.getItem("jwt")}`,
+        //   },
+        // });
+        // fetchClients();
+        showSnackbar(`${client.nombre} agregado con éxito.`);
       }
     } catch (error) {
       showSnackbar("Error al agregar el cliente");
@@ -50,51 +51,56 @@ const useClientApi = () => {
   const updateClient = async (client: Client) => {
     try {
       if (isAuthenticated()) {
-        const API_URL = import.meta.env.VITE_BACKENDURL + "/api/UpdateClient";
-        await axios.put(API_URL, client, {
-          headers: {
-            Authorization: `Bearer ${sessionStorage.getItem("jwt")}`,
-          },
-        });
-        fetchClients();
+        // const API_URL = import.meta.env.VITE_BACKENDURL + "/api/UpdateClient";
+        // await axios.put(API_URL, client, {
+        //   headers: {
+        //     Authorization: `Bearer ${sessionStorage.getItem("jwt")}`,
+        //   },
+        // });
+        // fetchClients();
+        showSnackbar(`${client.nombre} actualizado con éxito.`);
       }
     } catch (error) {
       showSnackbar("Error al actualizar cliente");
     }
   };
 
-  const deleteClient = async (clientId: string) => {
+  const deleteClient = async (client: Client) => {
     try {
       if (isAuthenticated()) {
-        const API_URL =
-          import.meta.env.VITE_BACKENDURL + `/api/DeleteClient/${clientId}`;
-        await axios.delete(API_URL, {
-          headers: {
-            Authorization: `Bearer ${sessionStorage.getItem("jwt")}`,
-          },
-        });
-        fetchClients();
+        //   const API_URL =
+        //     import.meta.env.VITE_BACKENDURL + `/api/DeleteClient/${clientId}`;
+        //   await axios.delete(API_URL, {
+        //     headers: {
+        //       Authorization: `Bearer ${sessionStorage.getItem("jwt")}`,
+        //     },
+        //   });
+        // fetchClients();
+        showSnackbar(`${client.nombre} eliminado con éxito.`);
       }
     } catch (error) {
       showSnackbar("Error al eliminar cliente");
     }
   };
 
-  const provisionClient = async (clientId: string, provisionAmount: number) => {
+  const provisionClient = async (client: Client, provisionAmount: number) => {
     try {
       if (isAuthenticated()) {
-        const API_URL =
-          import.meta.env.VITE_BACKENDURL + `/api/ProvisionClient/${clientId}`;
-        await axios.post(
-          API_URL,
-          { provisionAmount },
-          {
-            headers: {
-              Authorization: `Bearer ${sessionStorage.getItem("jwt")}`,
-            },
-          }
+        // const API_URL =
+        //   import.meta.env.VITE_BACKENDURL + `/api/ProvisionClient/${clientId}`;
+        // await axios.post(
+        //   API_URL,
+        //   { provisionAmount },
+        //   {
+        //     headers: {
+        //       Authorization: `Bearer ${sessionStorage.getItem("jwt")}`,
+        //     },
+        //   }
+        // );
+        // fetchClients();
+        showSnackbar(
+          `Se aprovisionó correctamente el cliente: ${client.nombre} con $${provisionAmount}`
         );
-        fetchClients();
       }
     } catch (error) {
       showSnackbar("Error al aprovisionar cliente");

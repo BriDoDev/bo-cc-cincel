@@ -1,5 +1,4 @@
-// src/components/Dashboard.tsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   Button,
   TextField,
@@ -22,12 +21,19 @@ import {
   TablePagination,
   Fab,
   useMediaQuery,
+  InputAdornment,
 } from "@mui/material";
 import {
   Search as SearchIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
   Add as AddIcon,
+  Visibility as VisibilityIcon,
+  VisibilityOff as VisibilityOffIcon,
+  ContentCopy as ContentCopyIcon,
+  AccountCircle as AccountCircleIcon,
+  Email as EmailIcon,
+  Percent as PercentIcon,
 } from "@mui/icons-material";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import DescriptionIcon from "@mui/icons-material/Description";
@@ -37,6 +43,23 @@ import { useAuthContext } from "../Context/AuthContext";
 import { Client } from "../Types/Type";
 import useClientApi from "../hooks/useClientApi";
 import { useClientContext } from "../Context/ClientContext";
+
+const ClientSchema = Yup.object({
+  nombre: Yup.string().required("Requerido"),
+  email: Yup.string()
+    .email("Dirección de correo invalida")
+    .required("Requerido"),
+});
+
+const ProvisionSchema = Yup.object({
+  provisionType: Yup.string().required("Requerido"),
+  provisionAmount: Yup.number()
+    .min(1, "Debe ser mayor que 0")
+    .required("Requerido"),
+  freeDesc: Yup.number()
+    .min(0, "Debe ser mayor que 0")
+    .max(100, "Debe ser menor que 100"),
+});
 
 const Dashboard: React.FC = () => {
   const {
@@ -52,11 +75,24 @@ const Dashboard: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [openEditDialog, setOpenEditDialog] = useState(false);
-  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
-  const [openProvisionDialog, setOpenProvisionDialog] = useState(false);
-  const [openAddDialog, setOpenAddDialog] = useState(false);
-  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  const [dialogState, setDialogState] = useState({
+    openEditDialog: false,
+    openDeleteDialog: false,
+    openProvisionDialog: false,
+    openAddDialog: false,
+    selectedClient: null as Client | null,
+  });
+  const [currentClient, setCurrentClient] = useState<Client>({
+    id: "",
+    nombre: "",
+    email: "",
+    saldo: 0,
+    fecha: "",
+    password: "",
+  });
+  const [visiblePassword, setVisiblePassword] = useState<{
+    [key: string]: boolean;
+  }>({});
   const isMdOrSm = useMediaQuery("(max-width:960px)");
 
   useEffect(() => {
@@ -87,73 +123,81 @@ const Dashboard: React.FC = () => {
     setPage(0);
   };
 
-  const handleOpenEditDialog = (client: Client) => {
-    setSelectedClient(client);
-    setOpenEditDialog(true);
-  };
+  const handleDialogOpen = useCallback(
+    (dialogType: string, client?: Client) => {
+      setDialogState((prevState) => ({
+        ...prevState,
+        [dialogType]: true,
+        selectedClient: client || null,
+      }));
+      setCurrentClient(
+        client || {
+          id: "",
+          nombre: "",
+          email: "",
+          saldo: 0,
+          fecha: "",
+          password: "",
+        }
+      );
+    },
+    []
+  );
 
-  const handleCloseEditDialog = () => {
-    setOpenEditDialog(false);
-    setSelectedClient(null);
-  };
+  const handleDialogClose = useCallback((dialogType: string) => {
+    setDialogState((prevState) => ({
+      ...prevState,
+      [dialogType]: false,
+      selectedClient: null,
+    }));
+    setCurrentClient({
+      id: "",
+      nombre: "",
+      email: "",
+      saldo: 0,
+      fecha: "",
+      password: "",
+    });
+  }, []);
 
-  const handleSaveEdit = async (values: Client) => {
-    await updateClient(values);
-    handleCloseEditDialog();
-    showSnackbar("Cliente actualizado con éxito");
-  };
-
-  const handleOpenDeleteDialog = (client: Client) => {
-    setSelectedClient(client);
-    setOpenDeleteDialog(true);
-  };
-
-  const handleCloseDeleteDialog = () => {
-    setOpenDeleteDialog(false);
-    setSelectedClient(null);
+  const handleSave = async (values: Client) => {
+    if (dialogState.openAddDialog) {
+      await addClient(values);
+    } else if (dialogState.openEditDialog && dialogState.selectedClient) {
+      await updateClient({ ...dialogState.selectedClient, ...values });
+    }
+    handleDialogClose(
+      dialogState.openAddDialog ? "openAddDialog" : "openEditDialog"
+    );
   };
 
   const handleDeleteClient = async () => {
-    if (selectedClient) {
-      await deleteClient(selectedClient.id);
-      handleCloseDeleteDialog();
-      showSnackbar("Cliente eliminado con éxito");
+    if (dialogState.selectedClient) {
+      await deleteClient(dialogState.selectedClient);
+      handleDialogClose("openDeleteDialog");
     }
-  };
-
-  const handleOpenProvisionDialog = (client: Client) => {
-    setSelectedClient(client);
-    setOpenProvisionDialog(true);
-  };
-
-  const handleCloseProvisionDialog = () => {
-    setOpenProvisionDialog(false);
-    setSelectedClient(null);
   };
 
   const handleSaveProvision = async (values: {
     provisionType: string;
     provisionAmount: number;
   }) => {
-    if (selectedClient) {
-      await provisionClient(selectedClient.id, values.provisionAmount);
-      handleCloseProvisionDialog();
-      showSnackbar("Cliente aprovisionado con éxito");
+    if (dialogState.selectedClient) {
+      await provisionClient(dialogState.selectedClient, values.provisionAmount);
+      handleDialogClose("openProvisionDialog");
     }
   };
 
-  const handleOpenAddDialog = () => {
-    setOpenAddDialog(true);
+  const togglePasswordVisibility = (clientId: string) => {
+    setVisiblePassword((prevState) => ({
+      ...prevState,
+      [clientId]: !prevState[clientId],
+    }));
   };
 
-  const handleCloseAddDialog = () => {
-    setOpenAddDialog(false);
-  };
-
-  const handleSaveAdd = async (values: Client) => {
-    await addClient(values);
-    handleCloseAddDialog();
-    showSnackbar("Cliente agregado con éxito");
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    showSnackbar("Password copiado al portapapeles");
   };
 
   return (
@@ -168,21 +212,20 @@ const Dashboard: React.FC = () => {
             endAdornment: <SearchIcon />,
           }}
         />
-        {!isMdOrSm && (
+        {!isMdOrSm ? (
           <Button
             variant="contained"
             startIcon={<AddIcon />}
-            onClick={handleOpenAddDialog}
+            onClick={() => handleDialogOpen("openAddDialog")}
             sx={{ minWidth: "max-content" }}
           >
             Nuevo cliente
           </Button>
-        )}
-        {isMdOrSm && (
+        ) : (
           <Fab
             color="primary"
             aria-label="add"
-            onClick={handleOpenAddDialog}
+            onClick={() => handleDialogOpen("openAddDialog")}
             style={{ position: "fixed", bottom: 16, right: 16 }}
           >
             <AddIcon />
@@ -215,6 +258,7 @@ const Dashboard: React.FC = () => {
                   <TableCell>Correo</TableCell>
                   <TableCell>Saldo disponible</TableCell>
                   <TableCell>Último aprovisionamiento</TableCell>
+                  <TableCell>Password</TableCell>
                   <TableCell>Acciones</TableCell>
                 </TableRow>
               </TableHead>
@@ -228,16 +272,56 @@ const Dashboard: React.FC = () => {
                       <TableCell>{client.saldo}</TableCell>
                       <TableCell>{client.fecha}</TableCell>
                       <TableCell>
+                        <div className="flex items-center">
+                          <TextField
+                            type={
+                              visiblePassword[client.id] ? "text" : "password"
+                            }
+                            value={client.password}
+                            variant="standard"
+                            InputProps={{
+                              readOnly: true,
+                              endAdornment: (
+                                <>
+                                  <IconButton
+                                    onClick={() =>
+                                      togglePasswordVisibility(client.id)
+                                    }
+                                  >
+                                    {visiblePassword[client.id] ? (
+                                      <VisibilityIcon />
+                                    ) : (
+                                      <VisibilityOffIcon />
+                                    )}
+                                  </IconButton>
+                                  <IconButton
+                                    onClick={() =>
+                                      copyToClipboard(client.password || "")
+                                    }
+                                  >
+                                    <ContentCopyIcon />
+                                  </IconButton>
+                                </>
+                              ),
+                            }}
+                          />
+                        </div>
+                      </TableCell>
+                      <TableCell>
                         <Tooltip title="Editar">
                           <IconButton
-                            onClick={() => handleOpenEditDialog(client)}
+                            onClick={() =>
+                              handleDialogOpen("openEditDialog", client)
+                            }
                           >
                             <EditIcon />
                           </IconButton>
                         </Tooltip>
                         <Tooltip title="Aprovisionar">
                           <IconButton
-                            onClick={() => handleOpenProvisionDialog(client)}
+                            onClick={() =>
+                              handleDialogOpen("openProvisionDialog", client)
+                            }
                           >
                             <AttachMoneyIcon />
                           </IconButton>
@@ -253,7 +337,9 @@ const Dashboard: React.FC = () => {
                         </Tooltip>
                         <Tooltip title="Eliminar">
                           <IconButton
-                            onClick={() => handleOpenDeleteDialog(client)}
+                            onClick={() =>
+                              handleDialogOpen("openDeleteDialog", client)
+                            }
                           >
                             <DeleteIcon />
                           </IconButton>
@@ -275,196 +361,231 @@ const Dashboard: React.FC = () => {
         </>
       )}
 
-      {/* Add Dialog */}
-      <Dialog
-        open={openAddDialog}
-        onClose={handleCloseAddDialog}
-        fullWidth
-        maxWidth="sm"
-      >
-        <DialogTitle>Nuevo Cliente</DialogTitle>
-        <Formik
-          initialValues={{ nombre: "", email: "" }}
-          validationSchema={Yup.object({
-            nombre: Yup.string().required("Requerido"),
-            email: Yup.string()
-              .email("Dirección de correo invalida")
-              .required("Requerido"),
-          })}
-          onSubmit={(values) => handleSaveAdd(values as Client)}
-        >
-          {({ errors, touched }) => (
-            <Form noValidate autoComplete="off">
-              <DialogContent>
-                <Field
-                  as={TextField}
-                  nombre="nombre"
-                  label="Nombre cliente"
-                  fullWidth
-                  required
-                  error={touched.nombre && Boolean(errors.nombre)}
-                  helperText={<ErrorMessage name="nombre" />}
-                  margin="dense"
-                />
-                <Field
-                  as={TextField}
-                  nombre="email"
-                  label="Correo"
-                  fullWidth
-                  required
-                  error={touched.email && Boolean(errors.email)}
-                  helperText={<ErrorMessage name="email" />}
-                  margin="dense"
-                />
-              </DialogContent>
-              <DialogActions>
-                <Button onClick={handleCloseAddDialog}>Cancelar</Button>
-                <Button type="submit">Aceptar</Button>
-              </DialogActions>
-            </Form>
-          )}
-        </Formik>
-      </Dialog>
+      <ClientDialog
+        open={dialogState.openAddDialog || dialogState.openEditDialog}
+        onClose={() =>
+          handleDialogClose(
+            dialogState.openAddDialog ? "openAddDialog" : "openEditDialog"
+          )
+        }
+        onSave={handleSave}
+        client={currentClient}
+        title={dialogState.openAddDialog ? "Nuevo Cliente" : "Editar Cliente"}
+      />
 
-      {/* Edit Dialog */}
-      <Dialog
-        open={openEditDialog}
-        onClose={handleCloseEditDialog}
-        fullWidth
-        maxWidth="sm"
+      <ConfirmDialog
+        open={dialogState.openDeleteDialog}
+        onClose={() => handleDialogClose("openDeleteDialog")}
+        onConfirm={handleDeleteClient}
+        title="Eliminar Cliente"
+        content={`¿Está seguro que desea eliminar el cliente ${dialogState.selectedClient?.nombre}?`}
+      />
+
+      <ProvisionDialog
+        open={dialogState.openProvisionDialog}
+        onClose={() => handleDialogClose("openProvisionDialog")}
+        onSave={handleSaveProvision}
+        client={dialogState.selectedClient}
+      />
+    </div>
+  );
+};
+
+interface ClientDialogProps {
+  open: boolean;
+  onClose: () => void;
+  onSave: (values: Client) => void;
+  client: Client;
+  title: string;
+}
+
+const ClientDialog: React.FC<ClientDialogProps> = ({
+  open,
+  onClose,
+  onSave,
+  client,
+  title,
+}) => {
+  return (
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+      <DialogTitle>{title}</DialogTitle>
+      <Formik
+        initialValues={client}
+        validationSchema={ClientSchema}
+        onSubmit={(values: Client) => onSave(values)}
       >
-        <DialogTitle>Editar Cliente</DialogTitle>
-        {selectedClient && (
-          <Formik
-            initialValues={selectedClient}
-            validationSchema={Yup.object({
-              nombre: Yup.string().required(
-                "Es necesario ingresar un nombre para continuar"
-              ),
-              email: Yup.string()
-                .email("Ingresa un correo electrónico válido")
-                .required("Es necesario ingresar un correo para continuar"),
-            })}
-            onSubmit={(values) => handleSaveEdit(values)}
-          >
-            {({ errors, touched }) => (
-              <Form noValidate autoComplete="off">
-                <DialogContent>
-                  <Field
-                    as={TextField}
-                    nombre="nombre"
-                    label="Nombre cliente"
-                    fullWidth
-                    required
-                    error={touched.nombre && Boolean(errors.nombre)}
-                    helperText={<ErrorMessage name="nombre" />}
-                    margin="dense"
-                  />
-                  <Field
-                    as={TextField}
-                    nombre="email"
-                    label="Correo"
-                    fullWidth
-                    required
-                    error={touched.email && Boolean(errors.email)}
-                    helperText={<ErrorMessage name="email" />}
-                    margin="dense"
-                  />
-                </DialogContent>
-                <DialogActions>
-                  <Button onClick={handleCloseEditDialog}>Cancelar</Button>
-                  <Button type="submit">Aceptar</Button>
-                </DialogActions>
-              </Form>
-            )}
-          </Formik>
+        {({ errors, touched }) => (
+          <Form noValidate autoComplete="off">
+            <DialogContent>
+              <Field
+                as={TextField}
+                name="nombre"
+                label="Nombre cliente"
+                fullWidth
+                required
+                error={touched.nombre && Boolean(errors.nombre)}
+                helperText={<ErrorMessage name="nombre" />}
+                margin="dense"
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <AccountCircleIcon />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+              <Field
+                as={TextField}
+                name="email"
+                label="Correo"
+                fullWidth
+                required
+                error={touched.email && Boolean(errors.email)}
+                helperText={<ErrorMessage name="email" />}
+                margin="dense"
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <EmailIcon />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={onClose}>Cancelar</Button>
+              <Button type="submit">Aceptar</Button>
+            </DialogActions>
+          </Form>
         )}
-      </Dialog>
+      </Formik>
+    </Dialog>
+  );
+};
 
-      {/* Delete Dialog */}
-      <Dialog
-        open={openDeleteDialog}
-        onClose={handleCloseDeleteDialog}
-        fullWidth
-        maxWidth="sm"
-      >
-        <DialogTitle>Eliminar Cliente</DialogTitle>
-        <DialogContent>
-          ¿Está seguro que desea eliminar el cliente {selectedClient?.nombre}?
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDeleteDialog}>Cancelar</Button>
-          <Button onClick={handleDeleteClient}>Eliminar</Button>
-        </DialogActions>
-      </Dialog>
+interface ConfirmDialogProps {
+  open: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  title: string;
+  content: string;
+}
 
-      {/* Provision Dialog */}
-      <Dialog
-        open={openProvisionDialog}
-        onClose={handleCloseProvisionDialog}
-        fullWidth
-        maxWidth="sm"
+const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
+  open,
+  onClose,
+  onConfirm,
+  title,
+  content,
+}) => {
+  return (
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+      <DialogTitle>{title}</DialogTitle>
+      <DialogContent>{content}</DialogContent>
+      <DialogActions>
+        <Button onClick={onClose}>Cancelar</Button>
+        <Button onClick={onConfirm}>Eliminar</Button>
+      </DialogActions>
+    </Dialog>
+  );
+};
+
+interface ProvisionDialogProps {
+  open: boolean;
+  onClose: () => void;
+  onSave: (values: { provisionType: string; provisionAmount: number }) => void;
+  client: Client | null;
+}
+
+const ProvisionDialog: React.FC<ProvisionDialogProps> = ({
+  open,
+  onClose,
+  onSave,
+  client,
+}) => {
+  return (
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+      <DialogTitle>Aprovisionar Cliente: {client?.nombre}</DialogTitle>
+      <Formik
+        initialValues={{ provisionType: "", provisionAmount: 0, freeDesc: 0 }}
+        validationSchema={ProvisionSchema}
+        onSubmit={(values) => onSave(values)}
       >
-        <DialogTitle>
-          Aprovisionar Cliente: {selectedClient?.nombre}
-        </DialogTitle>
-        <Formik
-          initialValues={{ provisionType: "", provisionAmount: 0 }}
-          validationSchema={Yup.object({
-            provisionType: Yup.string().required("Requerido"),
-            provisionAmount: Yup.number()
-              .min(1, "Debe ser mayor que 0")
-              .required("Requerido"),
-          })}
-          onSubmit={(values) => handleSaveProvision(values)}
-        >
-          {({ errors, touched }) => (
-            <Form noValidate autoComplete="off">
-              <DialogContent>
-                <FormControl
+        {({ errors, touched, values }) => (
+          <Form noValidate autoComplete="off">
+            <DialogContent>
+              <FormControl
+                fullWidth
+                margin="dense"
+                error={touched.provisionType && Boolean(errors.provisionType)}
+              >
+                <InputLabel id="provision-type-label">
+                  Tipo de aprovisionamiento
+                </InputLabel>
+                <Field
+                  as={Select}
+                  labelId="provision-type-label"
+                  id="provision-type"
+                  name="provisionType"
+                  label="Tipo de aprovisionamiento"
                   fullWidth
-                  margin="dense"
+                  required
                   error={touched.provisionType && Boolean(errors.provisionType)}
                 >
-                  <InputLabel>Tipo de aprovisionamiento</InputLabel>
-                  <Field
-                    as={Select}
-                    nombre="provisionType"
-                    label="Tipo de aprovisionamiento"
-                    fullWidth
-                    required
-                    error={
-                      touched.provisionType && Boolean(errors.provisionType)
-                    }
-                    helperText={<ErrorMessage name="provisionType" />}
-                  >
-                    <MenuItem value="type1">Tipo 1</MenuItem>
-                    <MenuItem value="type2">Tipo 2</MenuItem>
-                  </Field>
-                </FormControl>
+                  <MenuItem value="type1">Tipo 1</MenuItem>
+                  <MenuItem value="type2">Tipo 2</MenuItem>
+                  <MenuItem value="type3">Otro</MenuItem>
+                </Field>
+              </FormControl>
+              {values.provisionType === "type3" && (
                 <Field
                   as={TextField}
-                  nombre="provisionAmount"
-                  label="Monto"
+                  name="freeDesc"
+                  label="Descuento"
                   type="number"
                   fullWidth
                   required
                   margin="dense"
-                  error={
-                    touched.provisionAmount && Boolean(errors.provisionAmount)
-                  }
-                  helperText={<ErrorMessage name="provisionAmount" />}
+                  error={touched.freeDesc && Boolean(errors.freeDesc)}
+                  helperText={<ErrorMessage name="freeDesc" />}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <PercentIcon />
+                      </InputAdornment>
+                    ),
+                  }}
                 />
-              </DialogContent>
-              <DialogActions>
-                <Button onClick={handleCloseProvisionDialog}>Cancelar</Button>
-                <Button type="submit">Guardar</Button>
-              </DialogActions>
-            </Form>
-          )}
-        </Formik>
-      </Dialog>
-    </div>
+              )}
+              <Field
+                as={TextField}
+                name="provisionAmount"
+                label="Monto"
+                type="number"
+                fullWidth
+                required
+                margin="dense"
+                error={
+                  touched.provisionAmount && Boolean(errors.provisionAmount)
+                }
+                helperText={<ErrorMessage name="provisionAmount" />}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <AttachMoneyIcon />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={onClose}>Cancelar</Button>
+              <Button type="submit">Guardar</Button>
+            </DialogActions>
+          </Form>
+        )}
+      </Formik>
+    </Dialog>
   );
 };
 
