@@ -1,5 +1,3 @@
-// src/context/GlobalContext.tsx
-import { Snackbar, SnackbarProps } from "@mui/material";
 import React, {
   createContext,
   useState,
@@ -7,34 +5,36 @@ import React, {
   useEffect,
   ReactNode,
 } from "react";
+import { Snackbar } from "@mui/material";
+import { useClientApi } from "../hooks/useClientApi";
+import { Client, SnackbarState } from "../Types/Type";
 
-// Define the type for the context
 interface ContextType {
   jwt: string | null;
   setJwt: (jwt: string | null, expiresIn?: number) => void;
   logout: () => void;
   showSnackbar: (message: string) => void;
+  clients: Client[];
+  fetchClients: () => void;
+  addClient: (client: Client) => Promise<void>;
+  updateClient: (client: Client) => Promise<void>;
+  deleteClient: (clientId: number) => Promise<void>;
+  provisionClient: (clientId: number, provisionAmount: number) => Promise<void>;
 }
 
 export const Context = createContext<ContextType | undefined>(undefined);
 
 export const useGlobalContext = () => {
   const context = useContext(Context);
-  if (context === undefined) {
+  if (!context) {
     throw new Error("useGlobalContext must be used within a ContextProvider");
   }
   return context;
 };
 
-//#region Interfaces
 interface ContextProviderProps {
   children: ReactNode;
 }
-interface SnackbarState extends SnackbarProps {
-  message: string;
-  open: boolean;
-}
-//#endregion
 
 const ContextProvider: React.FC<ContextProviderProps> = ({ children }) => {
   const [jwt, setJwtState] = useState<string | null>(null);
@@ -44,6 +44,24 @@ const ContextProvider: React.FC<ContextProviderProps> = ({ children }) => {
     autoHideDuration: 3000,
     onClose: () => setSnackbarState((prev) => ({ ...prev, open: false })),
   });
+  const [clients, setClients] = useState<Client[]>([]);
+  const { getClients, addClient, updateClient, deleteClient, provisionClient } =
+    useClientApi();
+
+  useEffect(() => {
+    if (!jwt) return;
+
+    const initializeClients = async () => {
+      try {
+        const clientsData = await getClients();
+        setClients(clientsData);
+      } catch (error) {
+        showSnackbar("Error fetching clients");
+      }
+    };
+
+    initializeClients();
+  }, [jwt, getClients]);
 
   const showSnackbar = (message: string) => {
     setSnackbarState({
@@ -87,11 +105,72 @@ const ContextProvider: React.FC<ContextProviderProps> = ({ children }) => {
     sessionStorage.removeItem("jwt");
     sessionStorage.removeItem("jwt_expiration");
     setJwtState(null);
-    window.location.reload(); // Recargar la página
+    window.location.reload();
+  };
+
+  const fetchClients = async () => {
+    try {
+      const clientsData = await getClients();
+      setClients(clientsData);
+    } catch (error) {
+      showSnackbar("Error fetching clients");
+    }
+  };
+
+  const handleAddClient = async (client: Client) => {
+    try {
+      await addClient(client);
+      fetchClients();
+    } catch (error) {
+      showSnackbar("Error adding client");
+    }
+  };
+
+  const handleUpdateClient = async (client: Client) => {
+    try {
+      await updateClient(client);
+      fetchClients();
+    } catch (error) {
+      showSnackbar("Error updating client");
+    }
+  };
+
+  const handleDeleteClient = async (clientId: number) => {
+    try {
+      await deleteClient(clientId);
+      fetchClients();
+    } catch (error) {
+      showSnackbar("Error deleting client");
+    }
+  };
+
+  const handleProvisionClient = async (
+    clientId: number,
+    provisionAmount: number
+  ) => {
+    try {
+      await provisionClient(clientId, provisionAmount);
+      fetchClients();
+    } catch (error) {
+      showSnackbar("Error provisioning client");
+    }
+  };
+
+  const contextValue = {
+    jwt,
+    setJwt,
+    logout,
+    showSnackbar,
+    clients,
+    fetchClients,
+    addClient: handleAddClient,
+    updateClient: handleUpdateClient,
+    deleteClient: handleDeleteClient,
+    provisionClient: handleProvisionClient,
   };
 
   return (
-    <Context.Provider value={{ jwt, setJwt, logout, showSnackbar }}>
+    <Context.Provider value={contextValue}>
       {children}
       <Snackbar
         {...snackbarState}

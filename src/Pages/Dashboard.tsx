@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+// src/components/Dashboard.tsx
+import React, { useEffect, useState } from "react";
 import {
   Button,
   TextField,
@@ -33,19 +34,18 @@ import DescriptionIcon from "@mui/icons-material/Description";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { useGlobalContext } from "../Context/GlobalContext";
+import { Client } from "../Types/Type";
 
-interface Client {
-  id: number;
-  name: string;
-  email: string;
-  balance: number;
-  lastProvisioning: string;
-}
-
-const App: React.FC = () => {
-  const { showSnackbar } = useGlobalContext();
-  const [clients, setClients] = useState<Client[]>([]);
-  const [filteredClients, setFilteredClients] = useState<Client[]>([]);
+const Dashboard: React.FC = () => {
+  const {
+    showSnackbar,
+    clients,
+    fetchClients,
+    addClient,
+    updateClient,
+    deleteClient,
+    provisionClient,
+  } = useGlobalContext();
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -56,140 +56,24 @@ const App: React.FC = () => {
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const isMdOrSm = useMediaQuery("(max-width:960px)");
 
-  const initialClients: Client[] = [
-    {
-      id: 1,
-      name: "Empresa 1 S.A. de C.V",
-      email: "empresa1@empresa.com",
-      balance: 1000,
-      lastProvisioning: "01 May 2024",
-    },
-    {
-      id: 2,
-      name: "Empresa 2 S.A. de C.V",
-      email: "empresa2@empresa.com",
-      balance: 2000,
-      lastProvisioning: "02 May 2024",
-    },
-    {
-      id: 3,
-      name: "Empresa 3 S.A. de C.V",
-      email: "empresa3@empresa.com",
-      balance: 3000,
-      lastProvisioning: "03 May 2024",
-    },
-    {
-      id: 4,
-      name: "Empresa 4 S.A. de C.V",
-      email: "empresa4@empresa.com",
-      balance: 4000,
-      lastProvisioning: "04 May 2024",
-    },
-    {
-      id: 5,
-      name: "Empresa 5 S.A. de C.V",
-      email: "empresa5@empresa.com",
-      balance: 5000,
-      lastProvisioning: "05 May 2024",
-    },
-    {
-      id: 6,
-      name: "Empresa 6 S.A. de C.V",
-      email: "empresa6@empresa.com",
-      balance: 6000,
-      lastProvisioning: "06 May 2024",
-    },
-    {
-      id: 7,
-      name: "Empresa 7 S.A. de C.V",
-      email: "empresa7@empresa.com",
-      balance: 7000,
-      lastProvisioning: "07 May 2024",
-    },
-    {
-      id: 8,
-      name: "Empresa 8 S.A. de C.V",
-      email: "empresa8@empresa.com",
-      balance: 8000,
-      lastProvisioning: "08 May 2024",
-    },
-    {
-      id: 9,
-      name: "Empresa 9 S.A. de C.V",
-      email: "empresa9@empresa.com",
-      balance: 9000,
-      lastProvisioning: "09 May 2024",
-    },
-    {
-      id: 10,
-      name: "Empresa 10 S.A. de C.V",
-      email: "empresa10@empresa.com",
-      balance: 10000,
-      lastProvisioning: "10 May 2024",
-    },
-    {
-      id: 11,
-      name: "Empresa 11 S.A. de C.V",
-      email: "empresa11@empresa.com",
-      balance: 11000,
-      lastProvisioning: "11 May 2024",
-    },
-    {
-      id: 12,
-      name: "Empresa 12 S.A. de C.V",
-      email: "empresa12@empresa.com",
-      balance: 12000,
-      lastProvisioning: "12 May 2024",
-    },
-    {
-      id: 13,
-      name: "Empresa 13 S.A. de C.V",
-      email: "empresa13@empresa.com",
-      balance: 13000,
-      lastProvisioning: "13 May 2024",
-    },
-    {
-      id: 14,
-      name: "Empresa 14 S.A. de C.V",
-      email: "empresa14@empresa.com",
-      balance: 14000,
-      lastProvisioning: "14 May 2024",
-    },
-    {
-      id: 15,
-      name: "Empresa 15 S.A. de C.V",
-      email: "empresa15@empresa.com",
-      balance: 15000,
-      lastProvisioning: "15 May 2024",
-    },
-  ];
-
   useEffect(() => {
-    setClients(initialClients);
-    setFilteredClients(initialClients);
+    fetchClients();
   }, []);
 
-  useEffect(() => {
-    if (searchQuery === "") {
-      setFilteredClients(clients);
-    } else {
-      setFilteredClients(
-        clients.filter(
-          (client) =>
-            client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            client.email.toLowerCase().includes(searchQuery.toLowerCase())
-        )
-      );
-    }
-  }, [searchQuery, clients]);
+  const filteredClients = searchQuery
+    ? clients.filter(
+        (client) =>
+          client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          client.email.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : clients;
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
-    setPage(0); // Reset page to 0 when search query changes
+    setPage(0);
   };
 
   const handlePageChange = (event: unknown, newPage: number) => {
-    console.log(event);
     setPage(newPage);
   };
 
@@ -197,7 +81,7 @@ const App: React.FC = () => {
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0); // Reset page to 0 when rows per page changes
+    setPage(0);
   };
 
   const handleOpenEditDialog = (client: Client) => {
@@ -210,13 +94,9 @@ const App: React.FC = () => {
     setSelectedClient(null);
   };
 
-  const handleSaveEdit = (values: Client) => {
-    const updatedClients = clients.map((client) =>
-      client.id === values.id ? values : client
-    );
-    setClients(updatedClients);
-    setFilteredClients(updatedClients);
-    setOpenEditDialog(false);
+  const handleSaveEdit = async (values: Client) => {
+    await updateClient(values);
+    handleCloseEditDialog();
     showSnackbar("Cliente actualizado con éxito");
   };
 
@@ -230,13 +110,12 @@ const App: React.FC = () => {
     setSelectedClient(null);
   };
 
-  const handleDeleteClient = () => {
-    setClients(clients.filter((client) => client.id !== selectedClient?.id));
-    setFilteredClients(
-      clients.filter((client) => client.id !== selectedClient?.id)
-    );
-    setOpenDeleteDialog(false);
-    showSnackbar("Cliente eliminado con éxito");
+  const handleDeleteClient = async () => {
+    if (selectedClient) {
+      await deleteClient(selectedClient.id);
+      handleCloseDeleteDialog();
+      showSnackbar("Cliente eliminado con éxito");
+    }
   };
 
   const handleOpenProvisionDialog = (client: Client) => {
@@ -249,19 +128,15 @@ const App: React.FC = () => {
     setSelectedClient(null);
   };
 
-  const handleSaveProvision = (values: {
+  const handleSaveProvision = async (values: {
     provisionType: string;
     provisionAmount: number;
   }) => {
-    const updatedClients = clients.map((client) =>
-      client.id === selectedClient?.id
-        ? { ...client, balance: client.balance + values.provisionAmount }
-        : client
-    );
-    setClients(updatedClients);
-    setFilteredClients(updatedClients);
-    setOpenProvisionDialog(false);
-    showSnackbar("Cliente aprovisionado con éxito");
+    if (selectedClient) {
+      await provisionClient(selectedClient.id, values.provisionAmount);
+      handleCloseProvisionDialog();
+      showSnackbar("Cliente aprovisionado con éxito");
+    }
   };
 
   const handleOpenAddDialog = () => {
@@ -272,16 +147,9 @@ const App: React.FC = () => {
     setOpenAddDialog(false);
   };
 
-  const handleSaveAdd = (values: Client) => {
-    const newClient: Client = {
-      ...values,
-      id: clients.length + 1,
-      balance: 0,
-      lastProvisioning: new Date().toLocaleDateString(),
-    };
-    setClients([...clients, newClient]);
-    setFilteredClients([...clients, newClient]);
-    setOpenAddDialog(false);
+  const handleSaveAdd = async (values: Client) => {
+    await addClient(values);
+    handleCloseAddDialog();
     showSnackbar("Cliente agregado con éxito");
   };
 
@@ -353,7 +221,9 @@ const App: React.FC = () => {
                     </Tooltip>
                     <Tooltip title="Reporte">
                       <IconButton
-                        onClick={() => showSnackbar("Reporte de cliente")}
+                        onClick={() =>
+                          showSnackbar("Generación de reporte de cliente")
+                        }
                       >
                         <DescriptionIcon />
                       </IconButton>
@@ -399,12 +269,10 @@ const App: React.FC = () => {
                 .email("Ingresa un correo electrónico válido")
                 .required("Es necesario ingresar un correo para continuar"),
             })}
-            onSubmit={(values) => {
-              handleSaveEdit(values);
-            }}
+            onSubmit={(values) => handleSaveEdit(values)}
           >
             {({ errors, touched }) => (
-              <Form>
+              <Form noValidate autoComplete="off">
                 <DialogContent>
                   <Field
                     as={TextField}
@@ -429,9 +297,7 @@ const App: React.FC = () => {
                 </DialogContent>
                 <DialogActions>
                   <Button onClick={handleCloseEditDialog}>Cancelar</Button>
-                  <Button variant="contained" type="submit">
-                    Aceptar
-                  </Button>
+                  <Button type="submit">Aceptar</Button>
                 </DialogActions>
               </Form>
             )}
@@ -452,9 +318,7 @@ const App: React.FC = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDeleteDialog}>Cancelar</Button>
-          <Button variant="contained" onClick={handleDeleteClient}>
-            Eliminar
-          </Button>
+          <Button onClick={handleDeleteClient}>Eliminar</Button>
         </DialogActions>
       </Dialog>
 
@@ -474,11 +338,9 @@ const App: React.FC = () => {
               .required("Required")
               .min(1, "Must be greater than 0"),
           })}
-          onSubmit={(values) => {
-            handleSaveProvision(values);
-          }}
+          onSubmit={(values) => handleSaveProvision(values)}
         >
-          <Form>
+          <Form noValidate autoComplete="off">
             <DialogContent>
               <FormControl fullWidth margin="dense">
                 <InputLabel>Tipo de aprovisionamiento</InputLabel>
@@ -500,9 +362,7 @@ const App: React.FC = () => {
             </DialogContent>
             <DialogActions>
               <Button onClick={handleCloseProvisionDialog}>Cancelar</Button>
-              <Button variant="contained" type="submit">
-                Guardar
-              </Button>
+              <Button type="submit">Guardar</Button>
             </DialogActions>
           </Form>
         </Formik>
@@ -524,11 +384,9 @@ const App: React.FC = () => {
               .email("Invalid email address")
               .required("Required"),
           })}
-          onSubmit={(values) => {
-            handleSaveAdd(values as Client);
-          }}
+          onSubmit={(values) => handleSaveAdd(values as Client)}
         >
-          <Form>
+          <Form noValidate autoComplete="off">
             <DialogContent>
               <Field
                 as={TextField}
@@ -549,9 +407,7 @@ const App: React.FC = () => {
             </DialogContent>
             <DialogActions>
               <Button onClick={handleCloseAddDialog}>Cancelar</Button>
-              <Button variant="contained" type="submit">
-                Aceptar
-              </Button>
+              <Button type="submit">Aceptar</Button>
             </DialogActions>
           </Form>
         </Formik>
@@ -560,4 +416,4 @@ const App: React.FC = () => {
   );
 };
 
-export default App;
+export default Dashboard;
