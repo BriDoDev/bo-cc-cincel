@@ -58,7 +58,7 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     fetchClients();
-  }, []);
+  }, [fetchClients]);
 
   const filteredClients = searchQuery
     ? clients.filter(
@@ -73,7 +73,7 @@ const Dashboard: React.FC = () => {
     setPage(0);
   };
 
-  const handlePageChange = (event: unknown, newPage: number) => {
+  const handlePageChange = (_: unknown, newPage: number) => {
     setPage(newPage);
   };
 
