@@ -566,14 +566,13 @@ const ProvisionDialog: React.FC<ProvisionDialogProps> = ({
                   }}
                 >
                   {}
-                  {comboDesc.map((item) => {
-                    console.log(item);
-                    return (
-                      <MenuItem key={item.idType} value={item.idType}>
-                        {item.type} | {item.percentage}%
-                      </MenuItem>
-                    );
-                  })}
+                  {comboDesc.map((item) => (
+                    <MenuItem key={item.idType} value={item.idType}>
+                      {`${item.type} ${
+                        item.idType === 0 ? "" : `| ${item.percentage}%`
+                      }`}
+                    </MenuItem>
+                  ))}
                 </Field>
               </FormControl>
               {values.provisionType === 0 && (
