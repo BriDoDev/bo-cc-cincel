@@ -48,14 +48,9 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (token && expirationTime && now < parseInt(expirationTime)) {
       return true;
     } else {
-      showSnackbar("Tu sesión ha caducado");
       return false;
     }
   };
-
-  useEffect(() => {
-    isAuthenticated();
-  }, []);
 
   const showSnackbar = (message: string) => {
     setSnackbarState({
@@ -89,6 +84,10 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setJwtState(null);
     window.location.reload();
   };
+
+  useEffect(() => {
+    isAuthenticated();
+  }, []);
 
   return (
     <AuthContext.Provider

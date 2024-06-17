@@ -1,5 +1,6 @@
+// src/Context/ClientContext.tsx
 import React, { createContext, useState, useContext, ReactNode } from "react";
-import { Client } from "../Types/Type";
+import { Client, discount } from "../Types/Type";
 import { useAuthContext } from "./AuthContext";
 
 interface ClientContextType {
@@ -8,6 +9,8 @@ interface ClientContextType {
   showSnackbar: (message: string) => void;
   isLoading: boolean;
   setIsLoading: (loading: boolean) => void;
+  comboDesc: discount[];
+  setComboDesc: (discount: discount[]) => void;
 }
 
 const ClientContext = createContext<ClientContextType | undefined>(undefined);
@@ -28,15 +31,18 @@ const ClientProvider: React.FC<ClientProviderProps> = ({ children }) => {
   const { showSnackbar } = useAuthContext();
   const [clients, setClients] = useState<Client[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [comboDesc, setComboDesc] = useState<discount[]>([]);
 
   return (
     <ClientContext.Provider
       value={{
         clients,
         isLoading,
+        comboDesc,
         setClients,
         setIsLoading,
         showSnackbar,
+        setComboDesc,
       }}
     >
       {children}

@@ -43,3 +43,9 @@ export interface Client {
     exp: number;
     Email: string;
   }
+
+  export interface discount {
+    idType:  number,
+    percentage: number,
+    type: string,
+  }

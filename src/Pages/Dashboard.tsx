@@ -1,3 +1,4 @@
+// src/Pages/Dashboard.tsx
 import React, { useEffect, useState, useCallback } from "react";
 import {
   Button,
@@ -40,7 +41,7 @@ import DescriptionIcon from "@mui/icons-material/Description";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { useAuthContext } from "../Context/AuthContext";
-import { Client } from "../Types/Type";
+import { Client, discount } from "../Types/Type";
 import useClientApi from "../hooks/useClientApi";
 import { useClientContext } from "../Context/ClientContext";
 
@@ -69,8 +70,9 @@ const Dashboard: React.FC = () => {
     updateClient,
     deleteClient,
     provisionClient,
+    getComboDesc,
   } = useClientApi();
-  const { isLoading } = useClientContext();
+  const { isLoading, comboDesc } = useClientContext();
   const { showSnackbar } = useAuthContext();
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(0);
@@ -96,6 +98,7 @@ const Dashboard: React.FC = () => {
   const isMdOrSm = useMediaQuery("(max-width:960px)");
 
   useEffect(() => {
+    getComboDesc();
     fetchClients();
   }, []);
 
@@ -179,11 +182,24 @@ const Dashboard: React.FC = () => {
   };
 
   const handleSaveProvision = async (values: {
-    provisionType: string;
+    provisionType: number;
     provisionAmount: number;
+    freeDesc: number;
   }) => {
     if (dialogState.selectedClient) {
-      await provisionClient(dialogState.selectedClient, values.provisionAmount);
+      const currentDiscount: discount = {
+        idType: values.provisionType,
+        percentage: values.freeDesc,
+        type:
+          comboDesc.find((item) => item.idType === values.provisionType)
+            ?.type || "",
+      };
+
+      await provisionClient(
+        dialogState.selectedClient,
+        values.provisionAmount,
+        currentDiscount
+      );
       handleDialogClose("openProvisionDialog");
     }
   };
@@ -386,6 +402,7 @@ const Dashboard: React.FC = () => {
         onClose={() => handleDialogClose("openProvisionDialog")}
         onSave={handleSaveProvision}
         client={dialogState.selectedClient}
+        comboDesc={comboDesc}
       />
     </div>
   );
@@ -493,8 +510,13 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
 interface ProvisionDialogProps {
   open: boolean;
   onClose: () => void;
-  onSave: (values: { provisionType: string; provisionAmount: number }) => void;
+  onSave: (values: {
+    provisionType: number;
+    provisionAmount: number;
+    freeDesc: number;
+  }) => void;
   client: Client | null;
+  comboDesc: discount[];
 }
 
 const ProvisionDialog: React.FC<ProvisionDialogProps> = ({
@@ -502,16 +524,17 @@ const ProvisionDialog: React.FC<ProvisionDialogProps> = ({
   onClose,
   onSave,
   client,
+  comboDesc,
 }) => {
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle>Aprovisionar Cliente: {client?.nombre}</DialogTitle>
       <Formik
-        initialValues={{ provisionType: "", provisionAmount: 0, freeDesc: 0 }}
+        initialValues={{ provisionType: 1, provisionAmount: 0, freeDesc: 0 }}
         validationSchema={ProvisionSchema}
         onSubmit={(values) => onSave(values)}
       >
-        {({ errors, touched, values }) => (
+        {({ errors, touched, values, setFieldValue }) => (
           <Form noValidate autoComplete="off">
             <DialogContent>
               <FormControl
@@ -531,13 +554,25 @@ const ProvisionDialog: React.FC<ProvisionDialogProps> = ({
                   fullWidth
                   required
                   error={touched.provisionType && Boolean(errors.provisionType)}
+                  onChange={(e: React.ChangeEvent<{ value: unknown }>) => {
+                    setFieldValue("provisionType", e.target.value);
+                    if (e.target.value === 0) {
+                      setFieldValue(
+                        "freeDesc",
+                        comboDesc.find((item) => item.idType === 0)
+                          ?.percentage || 0
+                      );
+                    }
+                  }}
                 >
-                  <MenuItem value="type1">Tipo 1</MenuItem>
-                  <MenuItem value="type2">Tipo 2</MenuItem>
-                  <MenuItem value="type3">Otro</MenuItem>
+                  {comboDesc.map((item) => (
+                    <MenuItem key={item.idType} value={item.idType}>
+                      {item.type}
+                    </MenuItem>
+                  ))}
                 </Field>
               </FormControl>
-              {values.provisionType === "type3" && (
+              {values.provisionType === 0 && (
                 <Field
                   as={TextField}
                   name="freeDesc"
