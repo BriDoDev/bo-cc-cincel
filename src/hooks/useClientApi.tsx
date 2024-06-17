@@ -59,6 +59,7 @@ const useClientApi = () => {
       }
     } catch (error) {
       showSnackbar("Error al agregar el cliente");
+      setIsLoading(false);
     }
   };
 
@@ -67,7 +68,7 @@ const useClientApi = () => {
       if (isAuthenticated()) {
         setIsLoading(true);
         const API_URL = import.meta.env.VITE_BACKENDURL + "/api/Client";
-        await axios.put(
+        await axios.patch(
           API_URL,
           {
             Id: client.id,
@@ -87,7 +88,9 @@ const useClientApi = () => {
         showSnackbar("Tu sesión ha caducado");
       }
     } catch (error) {
+      console.error(error);
       showSnackbar("Error al actualizar cliente");
+      setIsLoading(false);
     }
   };
 
@@ -109,7 +112,9 @@ const useClientApi = () => {
         showSnackbar("Tu sesión ha caducado");
       }
     } catch (error) {
+      console.error(error);
       showSnackbar("Error al eliminar cliente");
+      setIsLoading(false);
     }
   };
 
@@ -145,7 +150,9 @@ const useClientApi = () => {
         showSnackbar("Tu sesión ha caducado");
       }
     } catch (error) {
+      console.error(error);
       showSnackbar("Error al aprovisionar cliente");
+      setIsLoading(false);
     }
   };
 
@@ -160,13 +167,18 @@ const useClientApi = () => {
           },
         });
 
-        setComboDesc(JSON.parse(response.data));
+        if (typeof response.data === "string") {
+          setComboDesc(JSON.parse(response.data));
+        } else {
+          setComboDesc(response.data);
+        }
       } else {
         showSnackbar("Tu sesión ha caducado");
       }
     } catch (error) {
       console.error(error);
       showSnackbar("Error al obtener descuentos");
+      setIsLoading(false);
     }
   };
 
