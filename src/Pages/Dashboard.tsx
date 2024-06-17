@@ -347,6 +347,7 @@ const Dashboard: React.FC = () => {
                             onClick={() =>
                               showSnackbar("Generación de reporte de cliente")
                             }
+                            disabled
                           >
                             <DescriptionIcon />
                           </IconButton>
