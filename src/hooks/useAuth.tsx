@@ -5,7 +5,7 @@ import { DecodedToken, userAuthenticate } from "../Types/Type";
 import { jwtDecode } from "jwt-decode";
 
 const useAuth = () => {
-  const { setJwt, showSnackbar, setIsLoading } = useAuthContext();
+  const { setJwt, setIsLoading } = useAuthContext();
 
   const authenticate = async ({ email, password }: userAuthenticate) => {
     try {
@@ -19,7 +19,7 @@ const useAuth = () => {
       setJwt(jwt, exp);
       setIsLoading(false);
 
-      showSnackbar("Sesión iniciada con éxito");
+      return "Sesión iniciada con éxito";
     } catch (e) {
       setIsLoading(false);
       if (axios.isAxiosError(e)) {
@@ -27,46 +27,41 @@ const useAuth = () => {
           const status = e.response.status;
           switch (status) {
             case 400:
-              showSnackbar(
+              throw new Error(
                 "Error en la solicitud. Por favor, verifica tu correo electrónico y contraseña."
               );
-              break;
             case 401:
-              showSnackbar(
+              throw new Error(
                 "Correo electrónico o contraseña incorrectos. Inténtalo nuevamente."
               );
-              break;
             case 403:
-              showSnackbar(
-                "Acceso denegado. No tienes permiso para iniciar sesión."
+              throw new Error(
+                "Correo electrónico o contraseña incorrectos. Inténtalo nuevamente."
               );
-              break;
             case 404:
-              showSnackbar(
+              throw new Error(
                 "Servicio no encontrado. Por favor, intenta más tarde."
               );
-              break;
             case 500:
-              showSnackbar(
+              throw new Error(
                 "Error interno del servidor. Por favor, intenta más tarde."
               );
-              break;
             default:
-              showSnackbar(
+              throw new Error(
                 "Error desconocido al iniciar sesión. Por favor, intenta más tarde."
               );
           }
         } else if (e.request) {
-          showSnackbar(
+          throw new Error(
             "No se recibió respuesta del servidor. Verifica tu conexión a internet."
           );
         } else {
-          showSnackbar(
+          throw new Error(
             "Error al configurar la solicitud de inicio de sesión. Por favor, intenta más tarde."
           );
         }
       } else {
-        showSnackbar(
+        throw new Error(
           "Error desconocido al iniciar sesión. Por favor, intenta más tarde."
         );
       }

@@ -103,7 +103,7 @@ const useClientApi = () => {
           API_URL,
           {
             Id: client.id,
-            Status: false,
+            Status: 0,
           },
           {
             headers: {
