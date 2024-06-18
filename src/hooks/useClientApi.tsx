@@ -98,14 +98,21 @@ const useClientApi = () => {
     try {
       if (isAuthenticated()) {
         setIsLoading(true);
-        //   const API_URL =
-        //     import.meta.env.VITE_BACKENDURL + `/api/DeleteClient/${clientId}`;
-        //   await axios.delete(API_URL, {
-        //     headers: {
-        //       Authorization: `Bearer ${sessionStorage.getItem("jwt")}`,
-        //     },
-        //   });
-        // fetchClients();
+        const API_URL = import.meta.env.VITE_BACKENDURL + "/api/Client";
+        await axios.patch(
+          API_URL,
+          {
+            Id: client.id,
+            Status: false,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${sessionStorage.getItem("jwt")}`,
+            },
+          }
+        );
+        fetchClients();
+
         showSnackbar(`${client.nombre} eliminado con éxito.`);
         setIsLoading(false);
       } else {

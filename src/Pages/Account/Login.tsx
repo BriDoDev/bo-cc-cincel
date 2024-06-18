@@ -56,8 +56,7 @@ const Login = () => {
           validationSchema={validationSchema}
           onSubmit={(values) => {
             authenticate(values)
-              .then((message) => {
-                showSnackbar(message);
+              .then(() => {
                 navigateTo("/");
               })
               .catch((e) => {
