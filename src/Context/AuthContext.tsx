@@ -14,6 +14,8 @@ interface AuthContextType {
   logout: () => void;
   showSnackbar: (message: string) => void;
   isAuthenticated: () => boolean;
+  isLoading: boolean;
+  setIsLoading: (loading: boolean) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -39,6 +41,7 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     onClose: () =>
       setSnackbarState((prev: SnackbarState) => ({ ...prev, open: false })),
   });
+  const [isLoading, setIsLoading] = useState(false);
 
   const isAuthenticated = () => {
     const token = sessionStorage.getItem("jwt");
@@ -93,10 +96,12 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     <AuthContext.Provider
       value={{
         jwt,
+        isLoading,
         setJwt,
         logout,
         showSnackbar,
         isAuthenticated,
+        setIsLoading,
       }}
     >
       {children}

@@ -164,20 +164,20 @@ const Dashboard: React.FC = () => {
   }, []);
 
   const handleSave = async (values: Client) => {
+    handleDialogClose(
+      dialogState.openAddDialog ? "openAddDialog" : "openEditDialog"
+    );
     if (dialogState.openAddDialog) {
       await addClient(values);
     } else if (dialogState.openEditDialog && dialogState.selectedClient) {
       await updateClient({ ...dialogState.selectedClient, ...values });
     }
-    handleDialogClose(
-      dialogState.openAddDialog ? "openAddDialog" : "openEditDialog"
-    );
   };
 
   const handleDeleteClient = async () => {
+    handleDialogClose("openDeleteDialog");
     if (dialogState.selectedClient) {
       await deleteClient(dialogState.selectedClient);
-      handleDialogClose("openDeleteDialog");
     }
   };
 
@@ -186,6 +186,7 @@ const Dashboard: React.FC = () => {
     provisionAmount: number;
     freeDesc: number;
   }) => {
+    handleDialogClose("openProvisionDialog");
     if (dialogState.selectedClient) {
       const currentDiscount: discount = {
         idType: values.provisionType,
@@ -200,7 +201,6 @@ const Dashboard: React.FC = () => {
         values.provisionAmount,
         currentDiscount
       );
-      handleDialogClose("openProvisionDialog");
     }
   };
 
