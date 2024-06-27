@@ -1,7 +1,7 @@
 // src/hooks/useClientApi.tsx
 import axios from "axios";
 import { useClientContext } from "../Context/ClientContext";
-import { Client, discount } from "../Types/Type";
+import { Client, dateReport, discount } from "../Types/Type";
 import { useAuthContext } from "../Context/AuthContext";
 
 const useClientApi = () => {
@@ -28,6 +28,7 @@ const useClientApi = () => {
         setIsLoading(false);
       } else {
         showSnackbar("Tu sesión ha caducado");
+        window.location.reload();
       }
     } catch (error) {
       showSnackbar("Error al obtener clientes");
@@ -56,6 +57,7 @@ const useClientApi = () => {
         setIsLoading(false);
       } else {
         showSnackbar("Tu sesión ha caducado");
+        window.location.reload();
       }
     } catch (error) {
       showSnackbar("Error al agregar el cliente");
@@ -86,6 +88,7 @@ const useClientApi = () => {
         setIsLoading(false);
       } else {
         showSnackbar("Tu sesión ha caducado");
+        window.location.reload();
       }
     } catch (error) {
       console.error(error);
@@ -117,6 +120,7 @@ const useClientApi = () => {
         setIsLoading(false);
       } else {
         showSnackbar("Tu sesión ha caducado");
+        window.location.reload();
       }
     } catch (error) {
       console.error(error);
@@ -155,6 +159,7 @@ const useClientApi = () => {
         setIsLoading(false);
       } else {
         showSnackbar("Tu sesión ha caducado");
+        window.location.reload();
       }
     } catch (error) {
       console.error(error);
@@ -181,11 +186,64 @@ const useClientApi = () => {
         }
       } else {
         showSnackbar("Tu sesión ha caducado");
+        window.location.reload();
       }
     } catch (error) {
       console.error(error);
       showSnackbar("Error al obtener descuentos");
       setIsLoading(false);
+    }
+  };
+
+  const getReporte = async (
+    date: dateReport,
+    client: Client,
+    nombre: string
+  ) => {
+    try {
+      if (isAuthenticated()) {
+        const API_URL = import.meta.env.VITE_BACKENDURL + "/api/GetReport";
+        const response = await axios.post(
+          API_URL,
+          {
+            IdClient: client.id,
+            Month: date.Month.toString(),
+            Year: date.Year.toString(),
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${sessionStorage.getItem("jwt")}`,
+            },
+            responseType: "blob",
+          }
+        );
+
+        if (response.status === 200) {
+          const url = window.URL.createObjectURL(
+            new Blob([response.data], { type: "application/pdf" })
+          );
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `${nombre.replace(/\s+/g, "-")}-${date.Month}-${
+            date.Year
+          }.pdf`;
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+          showSnackbar("Reporte generado");
+        } else {
+          showSnackbar("Error al generar reporte");
+        }
+      } else {
+        showSnackbar("Tu sesión ha caducado");
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error(error);
+      showSnackbar("Error al generar reporte");
+      setIsLoading(false);
+      throw error;
     }
   };
 
@@ -197,6 +255,7 @@ const useClientApi = () => {
     deleteClient,
     provisionClient,
     getComboDesc,
+    getReporte,
   };
 };
 

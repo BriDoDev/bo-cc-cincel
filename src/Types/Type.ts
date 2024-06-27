@@ -49,3 +49,8 @@ export interface Client {
     percentage: number,
     type: string,
   }
+
+  export interface dateReport {
+    Month: number,
+    Year: number,
+  }

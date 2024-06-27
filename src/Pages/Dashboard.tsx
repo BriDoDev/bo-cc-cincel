@@ -23,6 +23,7 @@ import {
   Fab,
   useMediaQuery,
   InputAdornment,
+  SelectChangeEvent,
 } from "@mui/material";
 import {
   Search as SearchIcon,
@@ -41,7 +42,7 @@ import DescriptionIcon from "@mui/icons-material/Description";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { useAuthContext } from "../Context/AuthContext";
-import { Client, discount } from "../Types/Type";
+import { Client, dateReport, discount } from "../Types/Type";
 import useClientApi from "../hooks/useClientApi";
 import { useClientContext } from "../Context/ClientContext";
 
@@ -71,6 +72,7 @@ const Dashboard: React.FC = () => {
     deleteClient,
     provisionClient,
     getComboDesc,
+    getReporte,
   } = useClientApi();
   const { isLoading, comboDesc } = useClientContext();
   const { showSnackbar } = useAuthContext();
@@ -82,6 +84,7 @@ const Dashboard: React.FC = () => {
     openDeleteDialog: false,
     openProvisionDialog: false,
     openAddDialog: false,
+    openReportDialog: false,
     selectedClient: null as Client | null,
   });
   const [currentClient, setCurrentClient] = useState<Client>({
@@ -96,11 +99,41 @@ const Dashboard: React.FC = () => {
     [key: string]: boolean;
   }>({});
   const isMdOrSm = useMediaQuery("(max-width:960px)");
+  const [reportDate, setReportDate] = useState<dateReport>({
+    Month: new Date().getMonth() + 1,
+    Year: new Date().getFullYear(),
+  });
 
   useEffect(() => {
     getComboDesc();
     fetchClients();
   }, []);
+
+  // Funciones para abrir y cerrar el diálogo de reporte
+  const handleReportDialogOpen = (client: Client) => {
+    setDialogState((prevState) => ({
+      ...prevState,
+      openReportDialog: true,
+      selectedClient: client,
+    }));
+  };
+
+  const handleReportDialogClose = () => {
+    setDialogState((prevState) => ({
+      ...prevState,
+      openReportDialog: false,
+      selectedClient: null,
+    }));
+  };
+
+  // Función para manejar la generación del reporte
+  const handleGenerateReport = async () => {
+    if (dialogState.selectedClient) {
+      const { nombre } = dialogState.selectedClient;
+      await getReporte(reportDate, dialogState.selectedClient, nombre);
+      handleReportDialogClose();
+    }
+  };
 
   const filteredClients = searchQuery
     ? clients.filter(
@@ -344,10 +377,7 @@ const Dashboard: React.FC = () => {
                         </Tooltip>
                         <Tooltip title="Reporte">
                           <IconButton
-                            onClick={() =>
-                              showSnackbar("Generación de reporte de cliente")
-                            }
-                            disabled
+                            onClick={() => handleReportDialogOpen(client)}
                           >
                             <DescriptionIcon />
                           </IconButton>
@@ -404,6 +434,14 @@ const Dashboard: React.FC = () => {
         onSave={handleSaveProvision}
         client={dialogState.selectedClient}
         comboDesc={comboDesc}
+      />
+
+      <ReportDialog
+        open={dialogState.openReportDialog}
+        onClose={handleReportDialogClose}
+        onGenerate={handleGenerateReport}
+        reportDate={reportDate}
+        setReportDate={setReportDate}
       />
     </div>
   );
@@ -628,4 +666,107 @@ const ProvisionDialog: React.FC<ProvisionDialogProps> = ({
   );
 };
 
+interface ReportDialogProps {
+  open: boolean;
+  onClose: () => void;
+  onGenerate: () => void;
+  reportDate: dateReport;
+  setReportDate: React.Dispatch<React.SetStateAction<dateReport>>;
+}
+
+const ReportDialog: React.FC<ReportDialogProps> = ({
+  open,
+  onClose,
+  onGenerate,
+  reportDate,
+  setReportDate,
+}) => {
+  const handleDateChange = (e: SelectChangeEvent<number>) => {
+    const { name, value } = e.target;
+    setReportDate((prev) => ({
+      ...prev,
+      [name]: value as number,
+    }));
+  };
+
+  const currentYear = new Date().getFullYear();
+  const years = Array.from(
+    { length: currentYear - 2024 + 1 },
+    (_, index) => 2024 + index
+  );
+  const months = [
+    { value: 1, label: "Enero" },
+    { value: 2, label: "Febrero" },
+    { value: 3, label: "Marzo" },
+    { value: 4, label: "Abril" },
+    { value: 5, label: "Mayo" },
+    { value: 6, label: "Junio" },
+    { value: 7, label: "Julio" },
+    { value: 8, label: "Agosto" },
+    { value: 9, label: "Septiembre" },
+    { value: 10, label: "Octubre" },
+    { value: 11, label: "Noviembre" },
+    { value: 12, label: "Diciembre" },
+  ];
+
+  return (
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+      <DialogTitle>Generar Reporte</DialogTitle>
+      <DialogContent>
+        <Formik initialValues={reportDate} onSubmit={onGenerate}>
+          {({ setFieldValue }) => (
+            <Form>
+              <FormControl fullWidth margin="dense">
+                <InputLabel id="month-label">Mes</InputLabel>
+                <Field
+                  as={Select}
+                  labelId="month-label"
+                  id="Month"
+                  name="Month"
+                  value={reportDate.Month}
+                  onChange={(e: SelectChangeEvent<number>) => {
+                    handleDateChange(e);
+                    setFieldValue("Month", e.target.value);
+                  }}
+                >
+                  {months.map((month) => (
+                    <MenuItem key={month.value} value={month.value}>
+                      {month.label}
+                    </MenuItem>
+                  ))}
+                </Field>
+              </FormControl>
+              <FormControl fullWidth margin="dense">
+                <InputLabel id="year-label">Año</InputLabel>
+                <Field
+                  as={Select}
+                  labelId="year-label"
+                  id="Year"
+                  name="Year"
+                  value={reportDate.Year}
+                  onChange={(e: SelectChangeEvent<number>) => {
+                    handleDateChange(e);
+                    setFieldValue("Year", e.target.value);
+                  }}
+                >
+                  {years.map((year) => (
+                    <MenuItem key={year} value={year}>
+                      {year}
+                    </MenuItem>
+                  ))}
+                </Field>
+              </FormControl>
+              <DialogActions>
+                <Button onClick={onClose}>Cancelar</Button>
+                <Button type="submit" color="primary">
+                  Generar
+                </Button>
+              </DialogActions>
+            </Form>
+          )}
+        </Formik>
+      </DialogContent>
+    </Dialog>
+  );
+};
 export default Dashboard;
