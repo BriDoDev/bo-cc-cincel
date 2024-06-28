@@ -195,11 +195,7 @@ const useClientApi = () => {
     }
   };
 
-  const getReporte = async (
-    date: dateReport,
-    client: Client,
-    nombre: string
-  ) => {
+  const getReporte = async (date: dateReport, client: Client) => {
     try {
       if (isAuthenticated()) {
         const API_URL = import.meta.env.VITE_BACKENDURL + "/api/GetReport";
@@ -224,9 +220,10 @@ const useClientApi = () => {
           );
           const a = document.createElement("a");
           a.href = url;
-          a.download = `${nombre.replace(/\s+/g, "-")}-${date.Month}-${
-            date.Year
-          }.pdf`;
+          // a.download = `${nombre.replace(/\s+/g, "-")}-${date.Month}-${
+          //   date.Year
+          // }.pdf`;
+          a.target = "_blank"; // Abre el enlace en una nueva pestaña
           document.body.appendChild(a);
           a.click();
           window.URL.revokeObjectURL(url);

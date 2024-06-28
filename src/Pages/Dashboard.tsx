@@ -129,8 +129,8 @@ const Dashboard: React.FC = () => {
   // Función para manejar la generación del reporte
   const handleGenerateReport = async () => {
     if (dialogState.selectedClient) {
-      const { nombre } = dialogState.selectedClient;
-      await getReporte(reportDate, dialogState.selectedClient, nombre);
+      // const { nombre } = dialogState.selectedClient;
+      await getReporte(reportDate, dialogState.selectedClient);
       handleReportDialogClose();
     }
   };
