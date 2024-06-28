@@ -226,8 +226,8 @@ const useClientApi = () => {
           a.target = "_blank"; // Abre el enlace en una nueva pestaña
           document.body.appendChild(a);
           a.click();
-          window.URL.revokeObjectURL(url);
-          document.body.removeChild(a);
+          // window.URL.revokeObjectURL(url);
+          // document.body.removeChild(a);
           showSnackbar("Reporte generado");
         } else {
           showSnackbar("Error al generar reporte");
