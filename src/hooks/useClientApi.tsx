@@ -102,11 +102,11 @@ const useClientApi = () => {
       if (isAuthenticated()) {
         setIsLoading(true);
         const API_URL = import.meta.env.VITE_BACKENDURL + "/api/Client";
-        await axios.patch(
+        const response = await axios.patch(
           API_URL,
           {
             Id: client.id,
-            Status: 0,
+            Status: false,
           },
           {
             headers: {
@@ -114,10 +114,14 @@ const useClientApi = () => {
             },
           }
         );
-        fetchClients();
+        if (response.status === 200) {
+          fetchClients();
 
-        showSnackbar(`${client.nombre} eliminado con éxito.`);
-        setIsLoading(false);
+          showSnackbar(`${client.nombre} eliminado con éxito.`);
+          setIsLoading(false);
+        } else {
+          throw new Error("Error al eliminar cliente");
+        }
       } else {
         showSnackbar("Tu sesión ha caducado");
         window.location.reload();
