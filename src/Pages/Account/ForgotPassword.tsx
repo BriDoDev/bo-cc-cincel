@@ -5,7 +5,7 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import { useEffect } from "react";
 import * as Yup from "yup";
 import useScrollToTopNavigation from "../../hooks/useScrollToTopNavigation";
-import Logo from "../../../public/img/logo-cincel.svg";
+import Logo from "../../../public/img/logo-personal.png";
 import { Email } from "@mui/icons-material";
 import { useAuthContext } from "../../Context/AuthContext";
 

@@ -11,7 +11,7 @@ import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
-import Logo from "../../public/img/logo-cincel.svg";
+import Logo from "../../public/img/logo-personal.png";
 import { useAuthContext } from "../Context/AuthContext";
 import { jwtDecode } from "jwt-decode";
 import { DecodedToken } from "../Types/Type";
@@ -63,7 +63,7 @@ function ResponsiveAppBar() {
           <Box
             component="img"
             sx={{
-              height: 40,
+              height: 80,
               display: { xs: "none", md: "flex" },
               mr: 1,
             }}

@@ -1,136 +1,71 @@
 // src/hooks/useClientApi.tsx
-import axios from "axios";
 import { useClientContext } from "../Context/ClientContext";
 import { Client, dateReport, discount } from "../Types/Type";
 import { useAuthContext } from "../Context/AuthContext";
+import { v4 as uuidv4 } from "uuid";
+
+const LOCAL_STORAGE_KEY = "demo_clients";
+const DISCOUNTS_KEY = "demo_discounts";
 
 const useClientApi = () => {
-  const { clients, setClients, showSnackbar, setIsLoading, setComboDesc } =
+  const { setClients, showSnackbar, setIsLoading, setComboDesc } =
     useClientContext();
   const { isAuthenticated } = useAuthContext();
 
-  const fetchClients = async () => {
-    try {
-      if (isAuthenticated()) {
-        setIsLoading(true);
-        const API_URL = import.meta.env.VITE_BACKENDURL + "/api/GetCredits";
-        const response = await axios.get(API_URL, {
-          headers: {
-            Authorization: `Bearer ${sessionStorage.getItem("jwt")}`,
-          },
-        });
+  const getStoredClients = (): Client[] => {
+    const data = localStorage.getItem(LOCAL_STORAGE_KEY);
+    return data ? JSON.parse(data) : [];
+  };
 
-        if (response.status === 200) {
-          setClients(response.data as Client[]);
-        } else {
-          throw new Error("Error al obtener clientes");
-        }
-        setIsLoading(false);
-      } else {
-        showSnackbar("Tu sesión ha caducado");
-        window.location.reload();
-      }
-    } catch (error) {
-      showSnackbar("Error al obtener clientes");
+  const saveClients = (clients: Client[]) => {
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(clients));
+    setClients(clients);
+  };
+
+  const fetchClients = async () => {
+    if (!isAuthenticated()) {
+      showSnackbar("Tu sesión ha caducado");
+      window.location.reload();
+      return;
     }
+    setIsLoading(true);
+    const data = getStoredClients();
+    setClients(data);
+    setIsLoading(false);
   };
 
   const addClient = async (client: Client) => {
-    try {
-      if (isAuthenticated()) {
-        setIsLoading(true);
-        const API_URL = import.meta.env.VITE_BACKENDURL + "/Api/CreateClient";
-        await axios.post(
-          API_URL,
-          {
-            Name: client.nombre,
-            Mail: client.email,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${sessionStorage.getItem("jwt")}`,
-            },
-          }
-        );
-        fetchClients();
-        showSnackbar(`${client.nombre} agregado con éxito.`);
-        setIsLoading(false);
-      } else {
-        showSnackbar("Tu sesión ha caducado");
-        window.location.reload();
-      }
-    } catch (error) {
-      showSnackbar("Error al agregar el cliente");
-      setIsLoading(false);
-    }
+    if (!isAuthenticated()) return;
+
+    const data = getStoredClients();
+    const newClient: Client = {
+      ...client,
+      id: uuidv4(),
+      saldo: 0,
+      fecha: new Date().toLocaleDateString(),
+      password: Math.random().toString(36).slice(-8), // demo password
+    };
+    data.push(newClient);
+    saveClients(data);
+    showSnackbar(`${client.nombre} agregado con éxito.`);
   };
 
   const updateClient = async (client: Client) => {
-    try {
-      if (isAuthenticated()) {
-        setIsLoading(true);
-        const API_URL = import.meta.env.VITE_BACKENDURL + "/api/Client";
-        await axios.patch(
-          API_URL,
-          {
-            Id: client.id,
-            Name: client.nombre,
-            Mail: client.email,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${sessionStorage.getItem("jwt")}`,
-            },
-          }
-        );
-        fetchClients();
-        showSnackbar(`${client.nombre} actualizado con éxito.`);
-        setIsLoading(false);
-      } else {
-        showSnackbar("Tu sesión ha caducado");
-        window.location.reload();
-      }
-    } catch (error) {
-      console.error(error);
-      showSnackbar("Error al actualizar cliente");
-      setIsLoading(false);
-    }
+    if (!isAuthenticated()) return;
+
+    const data = getStoredClients();
+    const updated = data.map((c) => (c.id === client.id ? client : c));
+    saveClients(updated);
+    showSnackbar(`${client.nombre} actualizado con éxito.`);
   };
 
   const deleteClient = async (client: Client) => {
-    try {
-      if (isAuthenticated()) {
-        setIsLoading(true);
-        const API_URL = import.meta.env.VITE_BACKENDURL + "/api/Client";
-        const response = await axios.patch(
-          API_URL,
-          {
-            Id: client.id,
-            Status: false,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${sessionStorage.getItem("jwt")}`,
-            },
-          }
-        );
-        if (response.status === 200) {
-          fetchClients();
+    if (!isAuthenticated()) return;
 
-          showSnackbar(`${client.nombre} eliminado con éxito.`);
-          setIsLoading(false);
-        } else {
-          throw new Error("Error al eliminar cliente");
-        }
-      } else {
-        showSnackbar("Tu sesión ha caducado");
-        window.location.reload();
-      }
-    } catch (error) {
-      console.error(error);
-      showSnackbar("Error al eliminar cliente");
-      setIsLoading(false);
-    }
+    const data = getStoredClients();
+    const filtered = data.filter((c) => c.id !== client.id);
+    saveClients(filtered);
+    showSnackbar(`${client.nombre} eliminado con éxito.`);
   };
 
   const provisionClient = async (
@@ -138,118 +73,52 @@ const useClientApi = () => {
     provisionAmount: number,
     desc: discount
   ) => {
-    try {
-      if (isAuthenticated()) {
-        setIsLoading(true);
-        const API_URL = import.meta.env.VITE_BACKENDURL + "/api/AsignCredits";
-        await axios.post(
-          API_URL,
-          {
-            IdCliente: client.id,
-            Cantidad: provisionAmount,
-            Tipo: desc.idType,
-            Descuento: desc.percentage,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${sessionStorage.getItem("jwt")}`,
-            },
+    if (!isAuthenticated()) return;
+
+    const data = getStoredClients();
+    const updated = data.map((c) =>
+      c.id === client.id
+        ? {
+            ...c,
+            saldo: (c.saldo || 0) + provisionAmount,
+            fecha: new Date().toLocaleDateString(),
           }
-        );
-        fetchClients();
-        showSnackbar(
-          `Se aprovisionó correctamente el cliente: ${client.nombre} con $${provisionAmount}`
-        );
-        setIsLoading(false);
-      } else {
-        showSnackbar("Tu sesión ha caducado");
-        window.location.reload();
-      }
-    } catch (error) {
-      console.error(error);
-      showSnackbar("Error al aprovisionar cliente");
-      setIsLoading(false);
-    }
+        : c
+    );
+    saveClients(updated);
+    showSnackbar(
+      `Se aprovisionó correctamente el cliente: ${client.nombre} con $${provisionAmount}`
+    );
   };
 
   const getComboDesc = async () => {
-    try {
-      if (isAuthenticated()) {
-        setIsLoading(true);
-        const API_URL = import.meta.env.VITE_BACKENDURL + "/api/GetDiscount";
-        const response = await axios.get(API_URL, {
-          headers: {
-            Authorization: `Bearer ${sessionStorage.getItem("jwt")}`,
-          },
-        });
+    if (!isAuthenticated()) return;
 
-        if (typeof response.data === "string") {
-          setComboDesc(JSON.parse(response.data));
-        } else {
-          setComboDesc(response.data);
-        }
-      } else {
-        showSnackbar("Tu sesión ha caducado");
-        window.location.reload();
-      }
-    } catch (error) {
-      console.error(error);
-      showSnackbar("Error al obtener descuentos");
-      setIsLoading(false);
+    setIsLoading(true);
+    const data = localStorage.getItem(DISCOUNTS_KEY);
+    if (data) {
+      setComboDesc(JSON.parse(data));
+    } else {
+      const defaultDiscounts: discount[] = [
+        { idType: 1, type: "Normal", percentage: 10 },
+        { idType: 0, type: "Especial", percentage: 15 },
+      ];
+      localStorage.setItem(DISCOUNTS_KEY, JSON.stringify(defaultDiscounts));
+      setComboDesc(defaultDiscounts);
     }
+    setIsLoading(false);
   };
 
   const getReporte = async (date: dateReport, client: Client) => {
-    try {
-      if (isAuthenticated()) {
-        const API_URL = import.meta.env.VITE_BACKENDURL + "/api/GetReport";
-        const response = await axios.post(
-          API_URL,
-          {
-            IdClient: client.id,
-            Month: date.Month.toString(),
-            Year: date.Year.toString(),
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${sessionStorage.getItem("jwt")}`,
-            },
-            responseType: "blob",
-          }
-        );
-
-        if (response.status === 200) {
-          const url = window.URL.createObjectURL(
-            new Blob([response.data], { type: "application/pdf" })
-          );
-          const a = document.createElement("a");
-          a.href = url;
-          // a.download = `${nombre.replace(/\s+/g, "-")}-${date.Month}-${
-          //   date.Year
-          // }.pdf`;
-          a.target = "_blank"; // Abre el enlace en una nueva pestaña
-          document.body.appendChild(a);
-          a.click();
-          // window.URL.revokeObjectURL(url);
-          // document.body.removeChild(a);
-          showSnackbar("Reporte generado");
-        } else {
-          showSnackbar("Error al generar reporte");
-        }
-      } else {
-        showSnackbar("Tu sesión ha caducado");
-        window.location.reload();
-      }
-    } catch (error) {
-      console.error(error);
-      showSnackbar("Error al generar reporte");
-      setIsLoading(false);
-      throw error;
-    }
+    showSnackbar("Reporte generado (demo).");
+    console.log(
+      `Generando PDF demo para ${client.nombre}, mes ${date.Month}, año ${date.Year}`
+    );
+    // Aquí podrías simular la descarga de un PDF fake si lo deseas
   };
 
   return {
-    clients,
+    clients: getStoredClients(),
     fetchClients,
     addClient,
     updateClient,
