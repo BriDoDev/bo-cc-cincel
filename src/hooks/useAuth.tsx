@@ -9,10 +9,7 @@ const useAuth = () => {
     try {
       setIsLoading(true);
 
-      const validEmail = "mail@mail.com";
-      const validPassword = "Asdfg123&";
-
-      if (email === validEmail && password === validPassword) {
+      if (email && password) {
         // Simular payload de JWT
         const payload = {
           Email: email,

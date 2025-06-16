@@ -52,9 +52,10 @@ const Login = () => {
         className="w-screen h-screen flex justify-center items-center p-4"
       >
         <Formik
-          initialValues={{ email: "", password: "" }}
+          initialValues={{ email: "mail@mail.com", password: "Asdfg123&" }}
           validationSchema={validationSchema}
           onSubmit={(values) => {
+            debugger;
             authenticate(values)
               .then((message) => {
                 showSnackbar(message);
@@ -142,9 +143,9 @@ const Login = () => {
               <div
                 data-aos="fade-up"
                 data-aos-delay="200"
-                className={`w-full mt-6`}
+                className={`flex flex-col gap-4 w-full mt-6`}
               >
-                <Button
+                {/* <Button
                   type="submit"
                   fullWidth
                   variant="contained"
@@ -152,6 +153,15 @@ const Login = () => {
                   disabled={isLoading}
                 >
                   {isLoading ? "Cargando..." : "Iniciar Sesión"}
+                </Button> */}
+                <Button
+                  type="submit"
+                  fullWidth
+                  variant="contained"
+                  color="primary"
+                  disabled={isLoading}
+                >
+                  {isLoading ? "Cargando..." : "Iniciar sesión demo"}
                 </Button>
               </div>
             </Form>
