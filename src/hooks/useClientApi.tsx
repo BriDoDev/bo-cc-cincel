@@ -68,11 +68,7 @@ const useClientApi = () => {
     showSnackbar(`${client.nombre} eliminado con éxito.`);
   };
 
-  const provisionClient = async (
-    client: Client,
-    provisionAmount: number,
-    desc: discount
-  ) => {
+  const provisionClient = async (client: Client, provisionAmount: number) => {
     if (!isAuthenticated()) return;
 
     const data = getStoredClients();
