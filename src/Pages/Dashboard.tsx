@@ -221,19 +221,15 @@ const Dashboard: React.FC = () => {
   }) => {
     handleDialogClose("openProvisionDialog");
     if (dialogState.selectedClient) {
-      const currentDiscount: discount = {
-        idType: values.provisionType,
-        percentage: values.freeDesc,
-        type:
-          comboDesc.find((item) => item.idType === values.provisionType)
-            ?.type || "",
-      };
+      // const currentDiscount: discount = {
+      //   idType: values.provisionType,
+      //   percentage: values.freeDesc,
+      //   type:
+      //     comboDesc.find((item) => item.idType === values.provisionType)
+      //       ?.type || "",
+      // };
 
-      await provisionClient(
-        dialogState.selectedClient,
-        values.provisionAmount,
-        currentDiscount
-      );
+      await provisionClient(dialogState.selectedClient, values.provisionAmount);
     }
   };
 
